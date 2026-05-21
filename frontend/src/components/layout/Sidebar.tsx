@@ -8,7 +8,7 @@ interface SidebarProps {
 const navItems: Array<{ label: string; page: SystemPage; icon: string }> = [
   { label: '修課紀錄', page: 'courseRecords', icon: '📚' },
   { label: '學分檢核', page: 'creditCheck', icon: '📊' },
-  { label: '個人設定', page: 'profile', icon: '⚙️' },
+  // { label: '個人設定', page: 'profile', icon: '⚙️' },
 ];
 
 export default function Sidebar({ activePage, onPageChange }: SidebarProps) {

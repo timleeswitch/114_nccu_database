@@ -8,7 +8,7 @@ import FeaturesSection from './components/FeaturesSection';
 import AppLayout from './components/layout/AppLayout';
 import CourseRecordsPage from './pages/CourseRecordsPage';
 import CreditCheckPage from './pages/CreditCheckPage';
-import ProfilePage from './pages/ProfilePage';
+// import ProfilePage from './pages/ProfilePage';
 import { loginStudent } from './services/studentService';
 import type { Student } from './types/student';
 import type { SystemPage } from './types/navigation';
@@ -41,9 +41,9 @@ export default function App() {
       return <CreditCheckPage />;
     }
 
-    if (activePage === 'profile') {
-      return <ProfilePage />;
-    }
+    // if (activePage === 'profile') {
+    //   return <ProfilePage />;
+    // }
 
     return <CourseRecordsPage studentId={currentStudent.student_id} />;
   }

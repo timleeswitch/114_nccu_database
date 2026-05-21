@@ -2,14 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
 import Modal from '../components/ui/Modal';
 import Select from '../components/ui/Select';
+import Toast from '../components/ui/Toast';
+import type { ToastTone } from '../components/ui/Toast';
 import { getSchoolCourses } from '../services/courseService';
 import {
   createEnrollment,
   deleteEnrollment,
   getStudentEnrollments,
-  updateEnrollment,
 } from '../services/enrollmentService';
 import type { Course, CourseCategory } from '../types/course';
 import type { EnrollmentRow } from '../types/enrollment';
@@ -22,6 +24,11 @@ interface CourseRecordsPageProps {
 interface EnrollmentFormState {
   semester: string;
   courseId: string;
+}
+
+interface ToastState {
+  message: string;
+  tone: ToastTone;
 }
 
 const semesters = ['111-1', '111-2', '112-1', '112-2', '113-1', '113-2', '114-1', '114-2'];
@@ -71,13 +78,18 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   const [semesterFilter, setSemesterFilter] = useState(allSemesters);
   const [categoryFilter, setCategoryFilter] = useState(allCategories);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<EnrollmentRow | null>(null);
   const [formState, setFormState] = useState<EnrollmentFormState>({
     semester: currentSemester,
     courseId: '',
   });
-  const [message, setMessage] = useState('');
+  const [courseSearch, setCourseSearch] = useState('');
+  const [isCourseSearchOpen, setIsCourseSearchOpen] = useState(false);
+  const [toast, setToast] = useState<ToastState | null>(null);
   const [formError, setFormError] = useState('');
+
+  function showToast(message: string, tone: ToastTone = 'success'): void {
+    setToast({ message, tone });
+  }
 
   async function loadRecords(): Promise<void> {
     const studentRecords = await getStudentEnrollments(studentId);
@@ -119,29 +131,43 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
 
   const selectedCourse = getCourseById(schoolCourses, formState.courseId);
   const totalCredits = filteredRecords.reduce((sum, record) => sum + record.credits, 0);
+  const filteredSchoolCourses = useMemo(() => {
+    const keyword = courseSearch.trim().toLowerCase();
+
+    if (!keyword) {
+      return schoolCourses;
+    }
+
+    return schoolCourses.filter((course) => {
+      return (
+        course.course_code.toLowerCase().includes(keyword) ||
+        course.name.toLowerCase().includes(keyword) ||
+        getCourseCategoryLabel(course.category).includes(keyword)
+      );
+    });
+  }, [schoolCourses, courseSearch]);
+  const shouldShowCourseSuggestions = isCourseSearchOpen && courseSearch.trim().length > 0;
 
   function openCreateForm(): void {
-    setEditingRecord(null);
     setFormState({ semester: currentSemester, courseId: '' });
-    setFormError('');
-    setIsFormOpen(true);
-  }
-
-  function openEditForm(record: EnrollmentRow): void {
-    setEditingRecord(record);
-    setFormState({
-      semester: record.semester,
-      courseId: String(record.course_id),
-    });
+    setCourseSearch('');
+    setIsCourseSearchOpen(false);
     setFormError('');
     setIsFormOpen(true);
   }
 
   function closeForm(): void {
     setIsFormOpen(false);
-    setEditingRecord(null);
     setFormState({ semester: currentSemester, courseId: '' });
+    setCourseSearch('');
+    setIsCourseSearchOpen(false);
     setFormError('');
+  }
+
+  function selectCourse(course: Course): void {
+    setFormState((current) => ({ ...current, courseId: String(course.course_id) }));
+    setCourseSearch(course.name);
+    setIsCourseSearchOpen(false);
   }
 
   async function handleSubmitEnrollment(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -156,19 +182,11 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     }
 
     try {
-      if (editingRecord) {
-        await updateEnrollment(editingRecord.enrollment_id, {
-          course_id: courseId,
-          semester: formState.semester,
-        });
-        setMessage('修課紀錄已更新。');
-      } else {
-        await createEnrollment(studentId, {
-          course_id: courseId,
-          semester: formState.semester,
-        });
-        setMessage('修課紀錄已新增。');
-      }
+      await createEnrollment(studentId, {
+        course_id: courseId,
+        semester: formState.semester,
+      });
+      showToast('修課紀錄已新增。');
 
       await loadRecords();
       closeForm();
@@ -187,26 +205,30 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     try {
       await deleteEnrollment(enrollmentId);
       await loadRecords();
-      setMessage('修課紀錄已刪除。');
+      showToast('修課紀錄已刪除。');
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : '修課紀錄刪除失敗。');
+      showToast(error instanceof Error ? error.message : '修課紀錄刪除失敗。', 'error');
     }
   }
 
   function handleSaveRecords(): void {
-    setMessage('已儲存目前 mock 修課紀錄。');
+    showToast('已儲存目前 mock 修課紀錄。');
   }
 
   return (
     <div className="space-y-6">
+      {toast && (
+        <Toast
+          message={toast.message}
+          tone={toast.tone}
+          onClose={() => setToast(null)}
+        />
+      )}
       <Card className="px-6 py-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium text-gray-500">個人修課紀錄</p>
             <h2 className="mt-1 text-3xl font-bold text-gray-900">修課紀錄</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-              你可以從學校課程庫選擇課程，加入自己的修課紀錄。課程代碼、名稱、學分與類別由系統帶入，不能自行修改。
-            </p>
             <p className="mt-2 text-sm text-gray-500">
               目前顯示 {filteredRecords.length} 筆紀錄，合計 {totalCredits} 學分
             </p>
@@ -247,10 +269,6 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
             )}
           </Select>
         </div>
-
-        {message && (
-          <p className="mt-5 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">{message}</p>
-        )}
       </Card>
 
       <Card className="overflow-hidden">
@@ -276,9 +294,6 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
                   <td className="px-5 py-4">{record.credits}</td>
                   <td className="px-5 py-4">
                     <div className="flex gap-2">
-                      <Button className="px-4 py-2" variant="secondary" onClick={() => openEditForm(record)}>
-                        編輯
-                      </Button>
                       <Button
                         className="px-4 py-2"
                         variant="danger"
@@ -309,12 +324,12 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
               取消
             </Button>
             <Button form="enrollment-form" type="submit">
-              {editingRecord ? '儲存修改' : '新增紀錄'}
+              新增紀錄
             </Button>
           </div>
         }
         isOpen={isFormOpen}
-        title={editingRecord ? '編輯修課紀錄' : '新增修課紀錄'}
+        title="新增修課紀錄"
         onClose={closeForm}
       >
         <form className="grid gap-5" id="enrollment-form" onSubmit={handleSubmitEnrollment}>
@@ -330,19 +345,57 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
                 </option>
               ))}
             </Select>
-            <Select
-              label="課程"
-              value={formState.courseId}
-              onChange={(event) => setFormState((current) => ({ ...current, courseId: event.target.value }))}
-            >
-              <option value="">請選擇課程</option>
-              {schoolCourses.map((course) => (
-                <option key={course.course_id} value={course.course_id}>
-                  {formatCourseOption(course)}
-                </option>
-              ))}
-            </Select>
+            <div className="relative">
+              <Input
+                label="搜尋課程"
+                placeholder="輸入課程代碼、名稱或類別"
+                value={courseSearch}
+                onChange={(event) => {
+                  setCourseSearch(event.target.value);
+                  setIsCourseSearchOpen(true);
+                }}
+                onFocus={() => setIsCourseSearchOpen(true)}
+              />
+              {shouldShowCourseSuggestions && (
+                <div className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-20 max-h-72 overflow-auto rounded-2xl border border-white/70 bg-white/95 p-2 shadow-xl backdrop-blur-xl">
+                  {filteredSchoolCourses.length > 0 ? (
+                    filteredSchoolCourses.map((course) => (
+                      <button
+                        key={course.course_id}
+                        className="w-full rounded-xl px-4 py-3 text-left text-sm transition-colors hover:bg-blue-50"
+                        onClick={() => selectCourse(course)}
+                        type="button"
+                      >
+                        <span className="block font-medium text-gray-900">{course.name}</span>
+                        <span className="mt-1 block text-xs text-gray-500">
+                          {course.course_code} · {course.credits} 學分 · {getCourseCategoryLabel(course.category)}
+                        </span>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-4 py-3 text-sm text-gray-500">沒有符合搜尋條件的課程。</p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
+          <Select
+            label="課程"
+            value={formState.courseId}
+            onChange={(event) => setFormState((current) => ({ ...current, courseId: event.target.value }))}
+          >
+            <option value="">請選擇課程</option>
+            {filteredSchoolCourses.map((course) => (
+              <option key={course.course_id} value={course.course_id}>
+                {formatCourseOption(course)}
+              </option>
+            ))}
+          </Select>
+          {filteredSchoolCourses.length === 0 && (
+            <p className="rounded-2xl bg-white/55 px-4 py-3 text-sm text-gray-500">
+              沒有符合搜尋條件的課程。
+            </p>
+          )}
           <CoursePreview course={selectedCourse} />
           {formError && <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">{formError}</p>}
         </form>
