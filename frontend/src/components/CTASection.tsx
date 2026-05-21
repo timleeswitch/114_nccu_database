@@ -1,6 +1,4 @@
-interface CTASectionProps {}
-
-export default function CTASection({}: CTASectionProps) {
+export default function CTASection() {
   return (
     <section className="py-20 flex justify-center">
       <button
