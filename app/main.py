@@ -2,10 +2,14 @@ import os
 from fastapi import FastAPI
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+
+# 先載入 .env 環境變數（保留同學的改動）
+load_dotenv()
 
 app = FastAPI(title="114 NCCU Database Project API")
 
-# 從環境變數讀取資料庫連線字串，如果讀不到就用預設的
+# 從環境變數讀取資料庫連線字串（保留你的 Docker 設定）
 DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://nccu_user:nccu_password@db:3306/nccu_db")
 
 # 建立 SQLAlchemy 資料庫引擎
