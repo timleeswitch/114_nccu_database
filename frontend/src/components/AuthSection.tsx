@@ -1,16 +1,22 @@
 import { useState } from 'react';
+import type { FormEvent } from 'react';
+import Button from './ui/Button';
+import Input from './ui/Input';
+import type { LoginPayload } from '../services/studentService';
 
-interface AuthSectionProps {}
+interface AuthSectionProps {
+  onLogin: (payload: LoginPayload) => Promise<void>;
+}
 
-const inputStyle: React.CSSProperties = {
-  background: 'rgba(255, 255, 255, 0.74)',
-  border: '1px solid rgba(255,255,255,0.6)',
-  backdropFilter: 'blur(8px)',
-  WebkitBackdropFilter: 'blur(8px)',
-};
-
-export default function AuthSection({}: AuthSectionProps) {
+export default function AuthSection({ onLogin }: AuthSectionProps) {
   const [tab, setTab] = useState<'login' | 'register'>('login');
+  const [studentId, setStudentId] = useState('1');
+  const [password, setPassword] = useState('');
+
+  async function handleLoginSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
+    event.preventDefault();
+    await onLogin({ studentId, password });
+  }
 
   return (
     <section className="px-6 md:px-16 py-12 flex justify-center">
@@ -48,52 +54,33 @@ export default function AuthSection({}: AuthSectionProps) {
         </div>
 
         {tab === 'login' ? (
-          <div className="relative flex flex-col gap-5">
-            <div>
-              <label className="block text-base text-gray-600 mb-2">學號</label>
-              <input type="text" placeholder="請輸入學號"
-                className="w-full px-5 py-4 rounded-xl text-base text-gray-700 outline-none transition-colors"
-                style={inputStyle} />
-            </div>
-            <div>
-              <label className="block text-base text-gray-600 mb-2">密碼</label>
-              <input type="password" placeholder="請輸入密碼"
-                className="w-full px-5 py-4 rounded-xl text-base text-gray-700 outline-none transition-colors"
-                style={inputStyle} />
-            </div>
-            <button
-              className="mt-3 w-full py-4 rounded-xl text-white text-base font-medium hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#036eb8' }}
-            >
+          <form className="relative flex flex-col gap-5" onSubmit={handleLoginSubmit}>
+            <Input
+              label="學號"
+              placeholder="請輸入學號"
+              type="text"
+              value={studentId}
+              onChange={(event) => setStudentId(event.target.value)}
+            />
+            <Input
+              label="密碼"
+              placeholder="請輸入密碼"
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+            <Button className="mt-3 w-full py-4 text-base" type="submit">
               登入
-            </button>
-          </div>
+            </Button>
+          </form>
         ) : (
           <div className="relative flex flex-col gap-5">
-            <div>
-              <label className="block text-base text-gray-600 mb-2">學號</label>
-              <input type="text" placeholder="請輸入學號"
-                className="w-full px-5 py-4 rounded-xl text-base text-gray-700 outline-none transition-colors"
-                style={inputStyle} />
-            </div>
-            <div>
-              <label className="block text-base text-gray-600 mb-2">Email</label>
-              <input type="email" placeholder="請輸入學校 Email"
-                className="w-full px-5 py-4 rounded-xl text-base text-gray-700 outline-none transition-colors"
-                style={inputStyle} />
-            </div>
-            <div>
-              <label className="block text-base text-gray-600 mb-2">密碼</label>
-              <input type="password" placeholder="請設定密碼"
-                className="w-full px-5 py-4 rounded-xl text-base text-gray-700 outline-none transition-colors"
-                style={inputStyle} />
-            </div>
-            <button
-              className="mt-3 w-full py-4 rounded-xl text-white text-base font-medium hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#036eb8' }}
-            >
+            <Input label="學號" placeholder="請輸入學號" type="text" />
+            <Input label="Email" placeholder="請輸入學校 Email" type="email" />
+            <Input label="密碼" placeholder="請設定密碼" type="password" />
+            <Button className="mt-3 w-full py-4 text-base">
               註冊
-            </button>
+            </Button>
           </div>
         )}
       </div>
