@@ -10,7 +10,6 @@ COPY requirements.txt .
 # 升級 pip 並強迫安裝所有必備套件，這次徹底補上 sqlalchemy！
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir uvicorn fastapi pymysql cryptography sqlalchemy
 
 # 4. 複製所有專案程式碼到容器內
 COPY . .
