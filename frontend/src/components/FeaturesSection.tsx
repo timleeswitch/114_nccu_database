@@ -85,24 +85,15 @@ function Illustration({ decoration, icon }: { decoration: Feature['decoration'];
   );
 }
 
-export default function FeaturesSection() {
+interface FeaturesSectionProps {}
+
+export default function FeaturesSection({}: FeaturesSectionProps) {
   return (
     <section id="features" className="px-6 md:px-16 pt-12 pb-0 text-center">
       <h2 className="text-3xl md:text-4xl font-bold text-gray-900">還有多少學分可以畢業？</h2>
       <p className="mt-3 text-gray-500 max-w-md mx-auto">
         立即登入，查看自己距離畢業門檻還有多少哩程<br /> 輕易掌握學分，確保順利畢業
       </p>
-      <div className="mx-auto mt-10 grid max-w-5xl gap-5 text-left md:grid-cols-2 lg:grid-cols-4">
-        {features.map((feature) => (
-          <article key={feature.title} className="overflow-hidden rounded-3xl bg-white shadow-lg">
-            <Illustration decoration={feature.decoration} icon={feature.icon} />
-            <div className="px-5 py-5">
-              <h3 className="text-lg font-semibold text-gray-900">{feature.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-gray-500">{feature.description}</p>
-            </div>
-          </article>
-        ))}
-      </div>
     </section>
   );
 }

@@ -121,4 +121,3 @@ export default function Button({ label, onClick, variant = 'primary' }: ButtonPr
 - Never modify `node_modules` directly
 - Store environment variables in `.env.local`; do not commit to git
 - Before adding a new package, check if a lighter alternative exists
-
