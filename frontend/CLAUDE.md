@@ -71,6 +71,7 @@ Rules:
 - Keep summary under 72 characters
 - No period at the end
 - Write in imperative mood ("add", not "added" or "adds")
+- Do not include Co-Authored-By trailers in commit messages
 
 ## Code Style
 
