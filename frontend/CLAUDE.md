@@ -116,6 +116,17 @@ export default function Button({ label, onClick, variant = 'primary' }: ButtonPr
 - Avoid props drilling beyond two levels; use Context or state management instead
 - Always handle loading and error states for async data
 
+## Previewing the App
+
+To preview the site, start the dev server and open it in Safari:
+
+```bash
+npm run dev
+open -a Safari http://localhost:5173
+```
+
+Do not use chromium-cli or screenshots — always open in Safari.
+
 ## Notes
 
 - Never modify `node_modules` directly
