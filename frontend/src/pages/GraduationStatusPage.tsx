@@ -83,21 +83,21 @@ export default function GraduationStatusPage() {
             {/* Stats */}
             <div className="flex-1 flex flex-col sm:flex-row gap-8 text-center md:text-left">
               <div>
-                <p className="text-gray-400 text-m mb-1">已修學分</p>
+                <p className="text-gray-400 text-base mb-1">已修學分</p>
                 <p className="leading-none">
                   <span className="text-5xl font-bold" style={{ color: '#6b8cba' }}>{totalCompleted}</span>
                   <span className="text-xl text-gray-400 ml-1">/ {totalRequired}</span>
                 </p>
               </div>
               <div>
-                <p className="text-gray-400 text-m mb-1">尚缺學分</p>
+                <p className="text-gray-400 text-base mb-1">尚缺學分</p>
                 <p className="leading-none">
                   <span className="text-5xl font-bold text-amber-400">{totalRequired - totalCompleted}</span>
                   <span className="text-xl text-gray-400 ml-1">學分</span>
                 </p>
               </div>
               <div>
-                <p className="text-gray-400 text-m mb-1">完成類別</p>
+                <p className="text-gray-400 text-base mb-1">完成類別</p>
                 <p className="leading-none">
                   <span className="text-5xl font-bold" style={{ color: '#50C878' }}>
                     {mockCategories.filter((c) => c.completed >= c.required).length}
