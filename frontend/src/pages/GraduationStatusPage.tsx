@@ -114,7 +114,7 @@ export default function GraduationStatusPage() {
                   key={label}
                   className="px-5 py-2.5 rounded-full text-sm font-medium text-gray-400 transition-all"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.12)',
+                    background: 'rgba(237, 233, 233, 0.28)',
                     backdropFilter: 'blur(40px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                     border: '1px solid rgba(255, 255, 255, 0.45)',
