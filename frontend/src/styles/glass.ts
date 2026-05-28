@@ -10,7 +10,7 @@ export const glassCard: React.CSSProperties = {
 };
 
 export const glassInput: React.CSSProperties = {
-  background: 'rgba(255, 255, 255, 0.74)',
+  background: 'rgba(255, 255, 255, 0.25)',
   backdropFilter: 'blur(8px)',
   WebkitBackdropFilter: 'blur(8px)',
   border: '1px solid rgba(255,255,255,0.6)',
