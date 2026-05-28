@@ -30,7 +30,8 @@ export default function HeroSection({}: HeroSectionProps) {
       </div>
 
       {/* Single overview card */}
-      <div className="mt-10 mx-auto max-w-2xl bg-white rounded-3xl shadow-xl px-12 py-8 text-left">
+      <div className="mt-10 mx-auto max-w-2xl bg-white rounded-3xl shadow-xl px-12 py-8 text-left"
+        style={{boxShadow: '0 8px 32px rgba(100,140,180,0.2), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.04)'}}>
         <div className="flex items-center gap-8">
           {/* Large two-arc donut */}
           <svg viewBox="0 0 120 120" className="w-36 h-36 shrink-0">
