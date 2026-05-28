@@ -1,6 +1,5 @@
 import NavBar from '../components/NavBar';
 import CategoryCard from '../components/CategoryCard';
-import CourseSearchBar from '../components/CourseSearchBar';
 import type { CreditCategory } from '../components/CategoryCard';
 
 const mockStudent = {
@@ -26,7 +25,7 @@ const glassCard: React.CSSProperties = {
   backdropFilter: 'blur(24px) saturate(180%)',
   WebkitBackdropFilter: 'blur(24px) saturate(180%)',
   border: '1px solid rgba(255, 255, 255, 0.6)',
-  boxShadow: '0 8px 32px rgba(100,140,180,0.2), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.04)',
+  boxShadow: '0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
 };
 
 export default function GraduationStatusPage() {
@@ -52,9 +51,6 @@ export default function GraduationStatusPage() {
             {mockStudent.department} · {mockStudent.grade} · {mockStudent.studentId}
           </p>
         </div>
-
-        {/* Course search bar */}
-        <CourseSearchBar onAdd={(course) => console.log('Add course:', course)} />
 
         {/* Overall summary card */}
         <div className="rounded-3xl px-10 py-8 mb-8" style={glassCard}>
@@ -118,7 +114,7 @@ export default function GraduationStatusPage() {
                   key={label}
                   className="px-5 py-2.5 rounded-full text-sm font-medium text-gray-400 transition-all"
                   style={{
-                    background: 'rgba(237, 233, 233, 0.09)',
+                    background: 'rgba(255, 255, 255, 0.12)',
                     backdropFilter: 'blur(40px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(40px) saturate(180%)',
                     border: '1px solid rgba(255, 255, 255, 0.45)',
