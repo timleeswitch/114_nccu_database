@@ -1,6 +1,24 @@
-__pycache__/
-*.py[cod]
-*.db
-*.db-journal
+# Python
 .env
-frontend/node_modules/
+.env.*
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
