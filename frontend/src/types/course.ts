@@ -1,9 +1,9 @@
 export type CourseCategory =
   | 'required'
-  | 'core_elective'
-  | 'general'
-  | 'free_elective'
-  | 'other';
+  | 'elective'
+  | 'external'
+  | 'pe'
+  | 'general';
 
 export interface Course {
   course_id: number;
@@ -11,4 +11,5 @@ export interface Course {
   name: string;
   credits: number;
   category: CourseCategory;
+  sub_category?: string;
 }

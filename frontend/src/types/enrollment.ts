@@ -1,3 +1,5 @@
+import type { CourseCategory } from './course';
+
 export interface Enrollment {
   enrollment_id: number;
   student_id: number;
@@ -13,5 +15,5 @@ export interface EnrollmentRow {
   course_code: string;
   course_name: string;
   credits: number;
-  category: string;
+  category: CourseCategory;
 }

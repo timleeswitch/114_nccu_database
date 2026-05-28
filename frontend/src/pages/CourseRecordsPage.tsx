@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -35,9 +35,34 @@ const semesters = ['111-1', '111-2', '112-1', '112-2', '113-1', '113-2', '114-1'
 const currentSemester = '114-2';
 const allSemesters = '全部';
 const allCategories = '全部';
+type CategoryFilter = typeof allCategories | CourseCategory;
+
+const courseCategories: CourseCategory[] = [
+  'required',
+  'elective',
+  'external',
+  'pe',
+  'general',
+];
 
 function formatCourseOption(course: Course): string {
-  return `[${course.course_code}] ${course.name} - ${course.credits} 學分 - ${getCourseCategoryLabel(course.category)}`;
+  const categoryLabel = getCourseCategoryLabel(course.category);
+
+  if (course.category === 'external' && course.sub_category) {
+    return `[${course.course_code}] ${course.name} - ${course.credits} 學分 - ${categoryLabel} - ${course.sub_category}`;
+  }
+
+  return `[${course.course_code}] ${course.name} - ${course.credits} 學分 - ${categoryLabel}`;
+}
+
+function formatCourseSummary(course: Course): string {
+  const categoryLabel = getCourseCategoryLabel(course.category);
+
+  if (course.category === 'external' && course.sub_category) {
+    return `${course.course_code} · ${course.credits} 學分 · ${categoryLabel} · ${course.sub_category}`;
+  }
+
+  return `${course.course_code} · ${course.credits} 學分 · ${categoryLabel}`;
 }
 
 function getCourseById(courses: Course[], courseId: string): Course | undefined {
@@ -57,6 +82,9 @@ function CoursePreview({ course }: { course?: Course }) {
     ['課程代碼', course.course_code],
     ['課程名稱', course.name],
     ['課程類別', getCourseCategoryLabel(course.category)],
+    ...(course.category === 'external' && course.sub_category
+      ? [['系別', course.sub_category]]
+      : []),
     ['學分', `${course.credits} 學分`],
   ];
 
@@ -76,7 +104,8 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   const [records, setRecords] = useState<EnrollmentRow[]>([]);
   const [schoolCourses, setSchoolCourses] = useState<Course[]>([]);
   const [semesterFilter, setSemesterFilter] = useState(allSemesters);
-  const [categoryFilter, setCategoryFilter] = useState(allCategories);
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(allCategories);
+  const [coursePickerCategory, setCoursePickerCategory] = useState<CategoryFilter>(allCategories);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formState, setFormState] = useState<EnrollmentFormState>({
     semester: currentSemester,
@@ -86,6 +115,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   const [isCourseSearchOpen, setIsCourseSearchOpen] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const [formError, setFormError] = useState('');
+  const courseSearchRef = useRef<HTMLDivElement>(null);
 
   function showToast(message: string, tone: ToastTone = 'success'): void {
     setToast({ message, tone });
@@ -118,6 +148,27 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     };
   }, [studentId]);
 
+  useEffect(() => {
+    if (!isCourseSearchOpen) {
+      return undefined;
+    }
+
+    function handlePointerDown(event: PointerEvent): void {
+      if (
+        courseSearchRef.current &&
+        !courseSearchRef.current.contains(event.target as Node)
+      ) {
+        setIsCourseSearchOpen(false);
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown);
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+    };
+  }, [isCourseSearchOpen]);
+
   const filteredRecords = useMemo(() => {
     return records.filter((record) => {
       const matchesSemester =
@@ -134,22 +185,28 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   const filteredSchoolCourses = useMemo(() => {
     const keyword = courseSearch.trim().toLowerCase();
 
-    if (!keyword) {
-      return schoolCourses;
-    }
-
     return schoolCourses.filter((course) => {
-      return (
+      const matchesCategory =
+        coursePickerCategory === allCategories || course.category === coursePickerCategory;
+      const matchesKeyword =
+        !keyword ||
         course.course_code.toLowerCase().includes(keyword) ||
         course.name.toLowerCase().includes(keyword) ||
-        getCourseCategoryLabel(course.category).includes(keyword)
+        course.category.toLowerCase().includes(keyword) ||
+        getCourseCategoryLabel(course.category).includes(keyword) ||
+        (course.sub_category ?? '').toLowerCase().includes(keyword);
+
+      return (
+        matchesCategory &&
+        matchesKeyword
       );
     });
-  }, [schoolCourses, courseSearch]);
+  }, [schoolCourses, courseSearch, coursePickerCategory]);
   const shouldShowCourseSuggestions = isCourseSearchOpen && courseSearch.trim().length > 0;
 
   function openCreateForm(): void {
     setFormState({ semester: currentSemester, courseId: '' });
+    setCoursePickerCategory(allCategories);
     setCourseSearch('');
     setIsCourseSearchOpen(false);
     setFormError('');
@@ -159,6 +216,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   function closeForm(): void {
     setIsFormOpen(false);
     setFormState({ semester: currentSemester, courseId: '' });
+    setCoursePickerCategory(allCategories);
     setCourseSearch('');
     setIsCourseSearchOpen(false);
     setFormError('');
@@ -168,6 +226,30 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     setFormState((current) => ({ ...current, courseId: String(course.course_id) }));
     setCourseSearch(course.name);
     setIsCourseSearchOpen(false);
+  }
+
+  function handleCourseSearchChange(value: string): void {
+    setCourseSearch(value);
+    setFormState((current) => ({ ...current, courseId: '' }));
+    setIsCourseSearchOpen(true);
+    setFormError('');
+  }
+
+  function handleCourseSelectChange(courseId: string): void {
+    const course = getCourseById(schoolCourses, courseId);
+
+    setFormState((current) => ({ ...current, courseId }));
+    setCourseSearch(course?.name ?? '');
+    setIsCourseSearchOpen(false);
+    setFormError('');
+  }
+
+  function handleCoursePickerCategoryChange(category: CategoryFilter): void {
+    setCoursePickerCategory(category);
+    setFormState((current) => ({ ...current, courseId: '' }));
+    setCourseSearch('');
+    setIsCourseSearchOpen(false);
+    setFormError('');
   }
 
   async function handleSubmitEnrollment(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -257,16 +339,14 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
           <Select
             label="類別篩選"
             value={categoryFilter}
-            onChange={(event) => setCategoryFilter(event.target.value)}
+            onChange={(event) => setCategoryFilter(event.target.value as CategoryFilter)}
           >
             <option value={allCategories}>全部</option>
-            {(['required', 'core_elective', 'general', 'free_elective', 'other'] as CourseCategory[]).map(
-              (category) => (
-                <option key={category} value={category}>
-                  {getCourseCategoryLabel(category)}
-                </option>
-              ),
-            )}
+            {courseCategories.map((category) => (
+              <option key={category} value={category}>
+                {getCourseCategoryLabel(category)}
+              </option>
+            ))}
           </Select>
         </div>
       </Card>
@@ -333,7 +413,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
         onClose={closeForm}
       >
         <form className="grid gap-5" id="enrollment-form" onSubmit={handleSubmitEnrollment}>
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-3">
             <Select
               label="學期"
               value={formState.semester}
@@ -345,15 +425,24 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
                 </option>
               ))}
             </Select>
-            <div className="relative">
+            <Select
+              label="課程類別"
+              value={coursePickerCategory}
+              onChange={(event) => handleCoursePickerCategoryChange(event.target.value as CategoryFilter)}
+            >
+              <option value={allCategories}>全部</option>
+              {courseCategories.map((category) => (
+                <option key={category} value={category}>
+                  {getCourseCategoryLabel(category)}
+                </option>
+              ))}
+            </Select>
+            <div className="relative" ref={courseSearchRef}>
               <Input
                 label="搜尋課程"
                 placeholder="輸入課程代碼、名稱或類別"
                 value={courseSearch}
-                onChange={(event) => {
-                  setCourseSearch(event.target.value);
-                  setIsCourseSearchOpen(true);
-                }}
+                onChange={(event) => handleCourseSearchChange(event.target.value)}
                 onFocus={() => setIsCourseSearchOpen(true)}
               />
               {shouldShowCourseSuggestions && (
@@ -368,12 +457,12 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
                       >
                         <span className="block font-medium text-gray-900">{course.name}</span>
                         <span className="mt-1 block text-xs text-gray-500">
-                          {course.course_code} · {course.credits} 學分 · {getCourseCategoryLabel(course.category)}
+                          {formatCourseSummary(course)}
                         </span>
                       </button>
                     ))
                   ) : (
-                    <p className="px-4 py-3 text-sm text-gray-500">沒有符合搜尋條件的課程。</p>
+                    <p className="px-4 py-3 text-sm text-gray-500">沒有符合類別或搜尋條件的課程。</p>
                   )}
                 </div>
               )}
@@ -382,7 +471,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
           <Select
             label="課程"
             value={formState.courseId}
-            onChange={(event) => setFormState((current) => ({ ...current, courseId: event.target.value }))}
+            onChange={(event) => handleCourseSelectChange(event.target.value)}
           >
             <option value="">請選擇課程</option>
             {filteredSchoolCourses.map((course) => (
@@ -393,7 +482,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
           </Select>
           {filteredSchoolCourses.length === 0 && (
             <p className="rounded-2xl bg-white/55 px-4 py-3 text-sm text-gray-500">
-              沒有符合搜尋條件的課程。
+              沒有符合類別或搜尋條件的課程。
             </p>
           )}
           <CoursePreview course={selectedCourse} />

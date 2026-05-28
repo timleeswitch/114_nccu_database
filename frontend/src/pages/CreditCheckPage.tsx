@@ -11,7 +11,7 @@ export default function CreditCheckPage() {
       <ul className="mt-5 space-y-2 text-gray-600">
         <li>總畢業學分 128 學分</li>
         <li>專業必修 39 學分</li>
-        <li>專業群修 12 學分</li>
+        <li>體育課程與選修類別</li>
         <li>缺少的必修課程</li>
         <li>各類別已完成與未完成狀態</li>
       </ul>

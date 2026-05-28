@@ -12,10 +12,17 @@ export default function AuthSection({ onLogin }: AuthSectionProps) {
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [studentId, setStudentId] = useState('1');
   const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState('');
 
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
-    await onLogin({ studentId, password });
+    setAuthError('');
+
+    try {
+      await onLogin({ studentId, password });
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : '登入失敗，請稍後再試。');
+    }
   }
 
   return (
@@ -69,6 +76,11 @@ export default function AuthSection({ onLogin }: AuthSectionProps) {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />
+            {authError && (
+              <p className="rounded-2xl bg-red-50/90 px-4 py-3 text-sm text-red-600">
+                {authError}
+              </p>
+            )}
             <Button className="mt-3 w-full py-4 text-base" type="submit">
               登入
             </Button>

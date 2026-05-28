@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Button from './Button';
 
 export type ToastTone = 'success' | 'error';
@@ -21,13 +21,19 @@ const toneStyles: Record<ToastTone, { accent: string; label: string }> = {
 };
 
 export default function Toast({ message, tone = 'success', onClose }: ToastProps) {
+  const onCloseRef = useRef(onClose);
+
   useEffect(() => {
-    const timer = window.setTimeout(onClose, 3200);
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => onCloseRef.current(), 3200);
 
     return () => {
       window.clearTimeout(timer);
     };
-  }, [message, onClose]);
+  }, [message, tone]);
 
   const style = toneStyles[tone];
 

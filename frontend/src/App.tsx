@@ -8,8 +8,9 @@ import FeaturesSection from './components/FeaturesSection';
 import AppLayout from './components/layout/AppLayout';
 import CourseRecordsPage from './pages/CourseRecordsPage';
 import CreditCheckPage from './pages/CreditCheckPage';
-// import ProfilePage from './pages/ProfilePage';
+import ProfilePage from './pages/ProfilePage';
 import { loginStudent } from './services/studentService';
+import type { LoginPayload } from './services/studentService';
 import type { Student } from './types/student';
 import type { SystemPage } from './types/navigation';
 import './index.css';
@@ -21,8 +22,8 @@ export default function App() {
   const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
   const [activePage, setActivePage] = useState<SystemPage>('courseRecords');
 
-  async function handleLogin(): Promise<void> {
-    const student = await loginStudent();
+  async function handleLogin(payload: LoginPayload): Promise<void> {
+    const student = await loginStudent(payload);
     setCurrentStudent(student);
     setActivePage('courseRecords');
   }
@@ -41,9 +42,9 @@ export default function App() {
       return <CreditCheckPage />;
     }
 
-    // if (activePage === 'profile') {
-    //   return <ProfilePage />;
-    // }
+    if (activePage === 'profile') {
+      return <ProfilePage />;
+    }
 
     return <CourseRecordsPage studentId={currentStudent.student_id} />;
   }
