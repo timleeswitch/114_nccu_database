@@ -1,13 +1,12 @@
 """CLI wrapper around ``app.services.graduation_check.check_graduation``.
 
-Lets anyone exercise the graduation check from the shell without standing
-up FastAPI or writing Python::
+Graduation check from the shell without standing up FastAPI or writing Python::
 
-    python -m scripts.check_grad 1                 # text summary for one student
-    python -m scripts.check_grad 1 2 3             # summaries for several students
-    python -m scripts.check_grad --all             # every student in the DB
-    python -m scripts.check_grad 1 --json          # JSON output for backend devs
-    python -m scripts.check_grad --all --json      # JSON list of every student
+    python -m scripts.check_students_graduation 1                 # text summary for one student
+    python -m scripts.check_students_graduation 1 2 3             # summaries for several students
+    python -m scripts.check_students_graduation --all             # every student in the DB
+    python -m scripts.check_students_graduation 1 --json          # JSON output for backend devs
+    python -m scripts.check_students_graduation --all --json      # JSON list of every student
 
 The DB connection comes from ``app.database.SessionLocal`` and respects the
 ``DATABASE_URL`` environment variable.
@@ -34,7 +33,7 @@ def _parse_args() -> argparse.Namespace:
         The parsed ``argparse.Namespace``.
     """
     parser = argparse.ArgumentParser(
-        prog="python -m scripts.check_grad",
+        prog="python -m scripts.check_students_graduation",
         description=(
             "Run the graduation check for one or more students and print "
             "either a text summary or JSON."
@@ -66,7 +65,7 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    """CLI entrypoint dispatched by ``python -m scripts.check_grad``."""
+    """CLI entrypoint dispatched by ``python -m scripts.check_students_graduation``."""
     args = _parse_args()
     with SessionLocal() as session:
         if args.all:
