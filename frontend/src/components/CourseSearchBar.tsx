@@ -65,11 +65,19 @@ export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
           onBlur={() => { blurTimer.current = setTimeout(() => setShowDropdown(false), 150); }}
           placeholder="搜尋課程代碼或名稱新增課程..."
           className="flex-1 bg-transparent outline-none text-base placeholder-gray-300 rainbow-text"
+          aria-label="搜尋並新增課程"
+          aria-expanded={showDropdown && filtered.length > 0}
+          aria-controls="course-search-dropdown"
+          role="combobox"
+          aria-autocomplete="list"
         />
       </div>
 
       {showDropdown && filtered.length > 0 && (
         <div
+          id="course-search-dropdown"
+          role="listbox"
+          aria-label="課程搜尋結果"
           className="absolute top-full left-0 right-0 mt-2 rounded-2xl overflow-hidden z-10"
           style={{
             background: 'rgba(255,255,255,0.95)',
@@ -83,6 +91,8 @@ export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
             <button
               key={course.code}
               onMouseDown={() => handleSelect(course)}
+              role="option"
+              aria-selected={false}
               className="w-full flex items-center justify-between px-5 py-3 text-sm hover:bg-blue-50 transition-colors text-left"
             >
               <span className="text-gray-700 font-medium">{course.name}</span>
