@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import NavBar from './components/NavBar';
-import HeroSection from './components/HeroSection';
-import AuthSection from './components/AuthSection';
-import ContactSection from './components/ContactSection';
-import FeaturesSection from './components/FeaturesSection';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import CourseRecordsPage from './pages/CourseRecordsPage';
 import CreditCheckPage from './pages/CreditCheckPage';
+import GraduationStatusPage from './pages/GraduationStatusPage';
+import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import { loginStudent } from './services/studentService';
 import type { LoginPayload } from './services/studentService';
@@ -49,7 +47,11 @@ export default function App() {
     return <CourseRecordsPage studentId={currentStudent.student_id} />;
   }
 
-  if (currentStudent) {
+  function renderHome(): ReactNode {
+    if (!currentStudent) {
+      return <LoginPage onLogin={handleLogin} />;
+    }
+
     return (
       <div className="min-h-screen font-sans" style={{ background: appBackground }}>
         <AppLayout
@@ -65,15 +67,11 @@ export default function App() {
   }
 
   return (
-    <div
-      className="min-h-screen font-sans"
-      style={{ background: appBackground }}
-    >
-      <NavBar />
-      <HeroSection />
-      <FeaturesSection />
-      <AuthSection onLogin={handleLogin} />
-      <ContactSection />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={renderHome()} />
+        <Route path="/status" element={<GraduationStatusPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
