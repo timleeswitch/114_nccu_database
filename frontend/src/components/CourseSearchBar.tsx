@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const mockCourses = [
   { code: 'CS101', name: '程式設計', credits: 3 },
@@ -23,6 +23,11 @@ interface CourseSearchBarProps {
 export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
   const [query, setQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => { if (blurTimer.current) clearTimeout(blurTimer.current); };
+  }, []);
 
   const filtered = query.trim()
     ? mockCourses.filter(
@@ -57,7 +62,7 @@ export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
           value={query}
           onChange={(e) => { setQuery(e.target.value); setShowDropdown(true); }}
           onFocus={() => setShowDropdown(true)}
-          onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+          onBlur={() => { blurTimer.current = setTimeout(() => setShowDropdown(false), 150); }}
           placeholder="搜尋課程代碼或名稱新增課程..."
           className="flex-1 bg-transparent outline-none text-base placeholder-gray-300 rainbow-text"
         />
