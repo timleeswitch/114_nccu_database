@@ -11,7 +11,7 @@ interface AuthSectionProps {
 export default function AuthSection({ onLogin }: AuthSectionProps) {
   const [tab, setTab] = useState<'login' | 'register'>('login');
   const [studentId, setStudentId] = useState('1');
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('password');
   const [authError, setAuthError] = useState('');
 
   async function handleLoginSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {

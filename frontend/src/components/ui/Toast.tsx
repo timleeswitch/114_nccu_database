@@ -22,6 +22,8 @@ const toneStyles: Record<ToastTone, { accent: string; label: string }> = {
 
 export default function Toast({ message, tone = 'success', onClose }: ToastProps) {
   const onCloseRef = useRef(onClose);
+  const liveRole = tone === 'error' ? 'alert' : 'status';
+  const livePriority = tone === 'error' ? 'assertive' : 'polite';
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -38,7 +40,12 @@ export default function Toast({ message, tone = 'success', onClose }: ToastProps
   const style = toneStyles[tone];
 
   return (
-    <div className="fixed right-5 top-5 z-[60] w-[calc(100vw-2.5rem)] max-w-sm">
+    <div
+      aria-atomic="true"
+      aria-live={livePriority}
+      className="fixed right-5 top-5 z-[60] w-[calc(100vw-2.5rem)] max-w-sm"
+      role={liveRole}
+    >
       <div
         className="relative overflow-hidden rounded-2xl px-5 py-4 shadow-xl backdrop-blur-2xl"
         style={{

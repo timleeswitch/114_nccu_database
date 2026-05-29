@@ -13,6 +13,6 @@ export function getCourseCategoryLabel(category: CourseCategory | string): strin
     case 'general':
       return '通識';
     default:
-      return '系外';
+      return '未知';
   }
 }

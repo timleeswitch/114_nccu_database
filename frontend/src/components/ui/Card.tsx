@@ -1,12 +1,17 @@
+import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
 }
 
-export default function Card({ children, className = '', style, ...props }: CardProps) {
+const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
+  { children, className = '', style, ...props },
+  ref,
+) {
   return (
     <div
+      ref={ref}
       className={['relative overflow-hidden rounded-3xl', className].join(' ')}
       style={{
         background: 'rgba(255, 255, 255, 0.72)',
@@ -29,4 +34,6 @@ export default function Card({ children, className = '', style, ...props }: Card
       <div className="relative">{children}</div>
     </div>
   );
-}
+});
+
+export default Card;

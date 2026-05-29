@@ -18,7 +18,7 @@ import type { EnrollmentRow } from '../types/enrollment';
 import { getCourseCategoryLabel } from '../utils/courseCategory';
 
 interface CourseRecordsPageProps {
-  studentId: number;
+  studentId: string;
 }
 
 interface EnrollmentFormState {

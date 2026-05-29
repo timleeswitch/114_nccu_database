@@ -6,14 +6,30 @@ export interface LoginPayload {
   password: string;
 }
 
+function toStudent(student: (typeof mockStudents)[number]): Student {
+  return {
+    student_id: student.student_id,
+    name: student.name,
+    admission_year: student.admission_year,
+    department: student.department,
+    program: student.program,
+    is_delayed: student.is_delayed,
+  };
+}
+
 export async function getMockCurrentStudent(): Promise<Student> {
-  return Promise.resolve(mockStudents[0]);
+  return Promise.resolve(toStudent(mockStudents[0]));
 }
 
 export async function loginStudent(payload: LoginPayload): Promise<Student> {
-  const studentId = Number(payload.studentId.trim());
+  const studentId = payload.studentId.trim();
+  const password = payload.password.trim();
 
-  if (!payload.password.trim()) {
+  if (!studentId) {
+    throw new Error('請輸入學號。');
+  }
+
+  if (!password) {
     throw new Error('請輸入密碼。');
   }
 
@@ -23,9 +39,15 @@ export async function loginStudent(payload: LoginPayload): Promise<Student> {
     throw new Error('找不到此學號，請確認後再登入。');
   }
 
-  return Promise.resolve(student);
+  if (student.password !== password) {
+    throw new Error('密碼錯誤，請重新輸入。');
+  }
+
+  return Promise.resolve(toStudent(student));
 }
 
-export async function getStudent(studentId: number): Promise<Student | undefined> {
-  return Promise.resolve(mockStudents.find((student) => student.student_id === studentId));
+export async function getStudent(studentId: string): Promise<Student | undefined> {
+  const student = mockStudents.find((item) => item.student_id === studentId);
+
+  return Promise.resolve(student ? toStudent(student) : undefined);
 }

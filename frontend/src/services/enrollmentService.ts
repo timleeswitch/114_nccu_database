@@ -22,7 +22,7 @@ function assertCourseExists(courseId: number): void {
   }
 }
 
-function assertNoDuplicate(studentId: number, courseId: number, currentEnrollmentId?: number): void {
+function assertNoDuplicate(studentId: string, courseId: number, currentEnrollmentId?: number): void {
   const hasDuplicate = mockEnrollments.some(
     (enrollment) =>
       enrollment.student_id === studentId &&
@@ -63,7 +63,7 @@ function nextEnrollmentId(): number {
   return maxId + 1;
 }
 
-export async function getStudentEnrollments(studentId: number): Promise<EnrollmentRow[]> {
+export async function getStudentEnrollments(studentId: string): Promise<EnrollmentRow[]> {
   const rows = mockEnrollments
     .filter((enrollment) => enrollment.student_id === studentId)
     .map(buildEnrollmentRow)
@@ -74,7 +74,7 @@ export async function getStudentEnrollments(studentId: number): Promise<Enrollme
 }
 
 export async function createEnrollment(
-  studentId: number,
+  studentId: string,
   data: CreateEnrollmentData,
 ): Promise<EnrollmentRow> {
   assertCourseExists(data.course_id);
