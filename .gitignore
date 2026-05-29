@@ -21,3 +21,8 @@ build/
 
 # Editor
 .vscode/
+
+# SQLite database files (generated at runtime)
+*.db
+*.sqlite
+*.sqlite3
