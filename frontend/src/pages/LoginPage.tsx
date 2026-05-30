@@ -3,13 +3,8 @@ import HeroSection from '../components/HeroSection';
 import FeaturesSection from '../components/FeaturesSection';
 import AuthSection from '../components/AuthSection';
 import ContactSection from '../components/ContactSection';
-import type { LoginPayload } from '../services/studentService';
 
-interface LoginPageProps {
-  onLogin: (payload: LoginPayload) => Promise<void>;
-}
-
-export default function LoginPage({ onLogin }: LoginPageProps) {
+export default function LoginPage() {
   return (
     <div
       className="min-h-screen font-sans"
@@ -21,7 +16,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       <NavBar />
       <HeroSection />
       <FeaturesSection />
-      <AuthSection onLogin={onLogin} />
+      <AuthSection />
       <ContactSection />
     </div>
   );
