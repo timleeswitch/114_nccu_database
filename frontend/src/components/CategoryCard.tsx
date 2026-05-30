@@ -1,18 +1,11 @@
 import ProgressBar from './ProgressBar';
+import { glassCard } from '../styles/glass';
 
 export interface CreditCategory {
   name: string;
   completed: number;
   required: number;
 }
-
-const glassCard: React.CSSProperties = {
-  background: 'rgba(255, 255, 255, 0.9)',
-  backdropFilter: 'blur(24px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-  border: '1px solid rgba(255, 255, 255, 0.6)',
-  boxShadow: '0 8px 32px rgba(100,140,180,0.2), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.04)',
-};
 
 interface CategoryCardProps {
   category: CreditCategory;

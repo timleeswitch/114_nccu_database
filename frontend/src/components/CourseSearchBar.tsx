@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { glassInput } from '../styles/glass';
 
 const mockCourses = [
   { code: 'CS101', name: '程式設計', credits: 3 },
@@ -46,13 +47,7 @@ export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
     <div className="relative mb-6">
       <div
         className="flex items-center gap-3 rounded-2xl px-5 py-4"
-        style={{
-          background: 'rgba(255, 255, 255, 0.3)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          border: '1px solid rgba(255,255,255,0.6)',
-          boxShadow: '0 8px 32px rgba(100,140,180,0.2), 0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -2px 4px rgba(0,0,0,0.04)',
-        }}
+        style={glassInput}
       >
         <svg className="w-5 h-5 text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
@@ -65,11 +60,19 @@ export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
           onBlur={() => { blurTimer.current = setTimeout(() => setShowDropdown(false), 150); }}
           placeholder="搜尋課程代碼或名稱新增課程..."
           className="flex-1 bg-transparent outline-none text-base placeholder-gray-300 rainbow-text"
+          aria-label="搜尋並新增課程"
+          aria-expanded={showDropdown && filtered.length > 0}
+          aria-controls="course-search-dropdown"
+          role="combobox"
+          aria-autocomplete="list"
         />
       </div>
 
       {showDropdown && filtered.length > 0 && (
         <div
+          id="course-search-dropdown"
+          role="listbox"
+          aria-label="課程搜尋結果"
           className="absolute top-full left-0 right-0 mt-2 rounded-2xl overflow-hidden z-10"
           style={{
             background: 'rgba(255,255,255,0.95)',
@@ -83,6 +86,8 @@ export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
             <button
               key={course.code}
               onMouseDown={() => handleSelect(course)}
+              role="option"
+              aria-selected={false}
               className="w-full flex items-center justify-between px-5 py-3 text-sm hover:bg-blue-50 transition-colors text-left"
             >
               <span className="text-gray-700 font-medium">{course.name}</span>
