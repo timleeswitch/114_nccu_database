@@ -1,4 +1,6 @@
-export default function HeroSection() {
+interface HeroSectionProps {}
+
+export default function HeroSection({}: HeroSectionProps) {
   return (
     <section className="px-6 md:px-16 pt-10 pb-0 text-center">
       <div className="relative inline-block"></div>
