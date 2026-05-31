@@ -13,16 +13,38 @@ dist/
 build/
 .pytest_cache/
 
+# Node
+node_modules
+dist-ssr
+.vite
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
 # Logs
 *.log
+logs
 
 # macOS
 .DS_Store
 
 # Editor
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # SQLite database files (generated at runtime)
 *.db
 *.sqlite
 *.sqlite3
+
+# Claude Code
+.claude/
