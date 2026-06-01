@@ -5,7 +5,7 @@
 
 ---
 
-## Prerequests
+## Prerequisites
 
 > 第一次啟動請依序執行
 
