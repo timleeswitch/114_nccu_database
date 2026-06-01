@@ -1,5 +1,7 @@
 import NavBar from '../components/NavBar';
 import CategoryCard from '../components/CategoryCard';
+import CourseSearchBar from '../components/CourseSearchBar';
+import { glassCard, glassButton } from '../styles/glass';
 import type { CreditCategory } from '../components/CategoryCard';
 
 const mockStudent = {
@@ -19,14 +21,6 @@ const mockCategories: CreditCategory[] = [
 
 const totalCompleted = mockCategories.reduce((sum, c) => sum + c.completed, 0);
 const totalRequired = mockCategories.reduce((sum, c) => sum + c.required, 0);
-
-const glassCard: React.CSSProperties = {
-  background: 'rgba(255, 255, 255, 0.9)',
-  backdropFilter: 'blur(24px) saturate(180%)',
-  WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-  border: '1px solid rgba(255, 255, 255, 0.6)',
-  boxShadow: '0 4px 24px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8)',
-};
 
 export default function GraduationStatusPage() {
   const donutR = 46;
@@ -51,6 +45,9 @@ export default function GraduationStatusPage() {
             {mockStudent.department} · {mockStudent.grade} · {mockStudent.studentId}
           </p>
         </div>
+
+        {/* Course search bar */}
+        <CourseSearchBar onAdd={(course) => console.log('Add course:', course)} />
 
         {/* Overall summary card */}
         <div className="rounded-3xl px-10 py-8 mb-8" style={glassCard}>
@@ -113,13 +110,7 @@ export default function GraduationStatusPage() {
                 <button
                   key={label}
                   className="px-5 py-2.5 rounded-full text-sm font-medium text-gray-400 transition-all"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.12)',
-                    backdropFilter: 'blur(40px) saturate(180%)',
-                    WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                    border: '1px solid rgba(255, 255, 255, 0.45)',
-                    boxShadow: '0 6px 20px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.65), inset 0 -1px 0 rgba(255,255,255,0.1)',
-                  }}
+                  style={glassButton}
                 >
                   {label}
                 </button>
