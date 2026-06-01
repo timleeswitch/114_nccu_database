@@ -1,26 +1,41 @@
+import os
 from fastapi import FastAPI
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-from app import models
-from app.api import auth, courses, enrollments, graduation, students
-from app.database import Base, engine
+# 先載入 .env 環境變數（保留同學的改動）
+load_dotenv()
 
+app = FastAPI(title="114 NCCU Database Project API")
 
-app = FastAPI(
-    title="114 NCCU Database Project API",
-    docs_url=None,
-    redoc_url=None,
-    openapi_url=None,
-)
+# 從環境變數讀取資料庫連線字串（保留你的 Docker 設定）
+DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://nccu_user:nccu_password@db:3306/nccu_db")
 
-Base.metadata.create_all(bind=engine)
-
-app.include_router(auth.router)
-app.include_router(students.router)
-app.include_router(courses.router)
-app.include_router(enrollments.router)
-app.include_router(graduation.router)
-
+# 建立 SQLAlchemy 資料庫引擎
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 @app.get("/")
-def read_root() -> dict[str, str]:
-    return {"message": "114 NCCU Database Project API"}
+def read_root():
+    return {"message": "歡迎來到 114 政大資料庫期末專案 API！環境已成功運作！"}
+
+@app.get("/db-test")
+def test_db_connection():
+    """測試資料庫連線是否正常的 API 端點"""
+    try:
+        # 嘗試對 MySQL 撈取目前時間，驗證連線
+        with engine.connect() as connection:
+            result = connection.execute(text("SELECT NOW();"))
+            db_time = result.scalar()
+        return {
+            "status": "success",
+            "message": "成功連線到 MySQL 資料庫！",
+            "database_time": str(db_time)
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": "資料庫連線失敗，請檢查 Docker 設定或 MySQL 狀態。",
+            "error_detail": str(e)
+        }
