@@ -1,16 +1,11 @@
 from pydantic import BaseModel
 from typing import Optional
-
-class CourseCreate(BaseModel):
-    name: str
-    credits: int
-    category: str
-    sub_category: Optional[str] = None
+from decimal import Decimal
 
 class CourseResponse(BaseModel):
-    course_id: int
+    course_id: str
     name: str
-    credits: int
+    credits: Decimal
     category: str
     sub_category: Optional[str] = None
 
