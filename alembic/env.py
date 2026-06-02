@@ -1,12 +1,4 @@
-"""Alembic environment script.
-
-Wires Alembic to our project layout:
-
-* prepends the project root to ``sys.path`` so ``app.*`` is importable;
-* overrides ``sqlalchemy.url`` from the ``DATABASE_URL`` env var;
-* points ``target_metadata`` at the SQLAlchemy ``Base.metadata`` that all
-  ORM models register against.
-"""
+"""Alembic environment script."""
 from __future__ import annotations
 
 import os
@@ -21,8 +13,8 @@ from alembic import context
 # Make `app` importable when alembic is invoked from the project root.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.database import DATABASE_URL, Base  # noqa: E402
 from app import models  # noqa: F401, E402  # registers all models on Base.metadata
+from app.database import DATABASE_URL, Base  # noqa: E402
 
 config = context.config
 config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL", DATABASE_URL))
@@ -34,11 +26,7 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
-    """Run migrations without an active DB connection.
-
-    Emits SQL to ``stdout`` instead of executing it. Useful for generating
-    a migration script that a DBA will run by hand.
-    """
+    """Run migrations without an active DB connection."""
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
@@ -51,7 +39,7 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations with a live DB connection (the normal path)."""
+    """Run migrations with a live DB connection."""
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
