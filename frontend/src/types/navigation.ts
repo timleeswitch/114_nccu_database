@@ -1,1 +1,1 @@
-export type SystemPage = 'courseRecords' | 'creditCheck' | 'profile';
+export type SystemPage = 'courseRecords' | 'profile';
