@@ -26,11 +26,11 @@ app.include_router(
     tags=["students"],
 )
 
-app.include_router(
-    graduation.router,
-    prefix="/graduation",
-    tags=["graduation"],
-)
+# app.include_router(
+#     graduation.router,
+#     prefix="/graduation",
+#     tags=["graduation"],
+# )
 
 app.include_router(
     courses.router,
@@ -38,11 +38,11 @@ app.include_router(
     tags=["courses"],
 )
 
-app.include_router(
-    enrollments.router,
-    prefix="/enrollments",
-    tags=["enrollments"],
-)
+# app.include_router(
+#     enrollments.router,
+#     prefix="/enrollments",
+#     tags=["enrollments"],
+# )
 
 # 從環境變數讀取資料庫連線字串（保留你的 Docker 設定）
 DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://nccu_user:nccu_password@db:3306/nccu_db")
