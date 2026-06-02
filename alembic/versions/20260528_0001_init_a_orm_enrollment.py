@@ -62,7 +62,7 @@ def upgrade() -> None:
 
     op.create_table(
         "student",
-        sa.Column("student_id", sa.Integer(), autoincrement=True, nullable=False),
+        sa.Column("student_id", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("name", sa.String(length=100), nullable=False),
         sa.Column("hashed_password", sa.String(length=255), nullable=False),
         sa.PrimaryKeyConstraint("student_id"),
