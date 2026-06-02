@@ -9,10 +9,12 @@ def get_student(db: Session, student_id: int) -> Student | None:
 
 def create_student(
     db: Session,
+    student_id: int,
     name: str,
     hashed_password: str,
 ) -> Student:
     student = Student(
+        student_id=student_id,
         name=name,
         hashed_password=hashed_password,
     )
