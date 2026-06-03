@@ -1,9 +1,10 @@
 export type CourseCategory =
   | 'required'
   | 'core_elective'
-  | 'general'
   | 'free_elective'
-  | 'other';
+  | 'physical_education'
+  | 'general_education'
+  | 'core_general';
 
 export interface Course {
   course_id: number;
