@@ -34,7 +34,7 @@ def create_access_token(student_id: int) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     
     payload = {
-        "sub": str(student_id),
+        "sub": student_id,
         "exp": expire
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
@@ -54,13 +54,11 @@ def get_current_student_id(token: str = Depends(_oauth2_scheme)) -> int:
 
         student_id = payload.get("sub")
 
-        if student_id is None:
+        if not isinstance(student_id, int):
             raise _credentials_exception()
 
-        return int(student_id)
+        return student_id
 
-    except (ValueError, TypeError):
-        raise _credentials_exception()
     except Exception:
         raise _credentials_exception()
 
