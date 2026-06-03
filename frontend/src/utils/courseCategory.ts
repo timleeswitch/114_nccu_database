@@ -15,6 +15,6 @@ export function getCourseCategoryLabel(category: CourseCategory | string): strin
     case 'core_general':
       return '核心通識';
     default:
-      return category;
+      return '其他';
   }
 }
