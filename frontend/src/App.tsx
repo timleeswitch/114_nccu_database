@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import GraduationStatusPage from './pages/GraduationStatusPage';
+import CourseRecordsPage from './pages/CourseRecordsPage';
 import './index.css';
 
 export default function App() {
@@ -9,6 +10,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/status" element={<GraduationStatusPage />} />
+        <Route path="/records" element={<CourseRecordsPage studentId={1} />} />
       </Routes>
     </BrowserRouter>
   );
