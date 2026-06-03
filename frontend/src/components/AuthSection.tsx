@@ -1,7 +1,5 @@
 import { useState } from 'react';
 
-interface AuthSectionProps {}
-
 const inputStyle: React.CSSProperties = {
   background: 'rgba(255, 255, 255, 0.74)',
   border: '1px solid rgba(255,255,255,0.6)',
@@ -9,7 +7,7 @@ const inputStyle: React.CSSProperties = {
   WebkitBackdropFilter: 'blur(8px)',
 };
 
-export default function AuthSection({}: AuthSectionProps) {
+export default function AuthSection() {
   const [tab, setTab] = useState<'login' | 'register'>('login');
 
   return (

@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import CategoryCard from '../components/CategoryCard';
 import CourseSearchBar from '../components/CourseSearchBar';
+import SystemTabs from '../components/SystemTabs';
 import { glassCard, glassButton } from '../styles/glass';
 import type { CreditCategory } from '../components/CategoryCard';
 
@@ -23,9 +25,14 @@ const totalCompleted = mockCategories.reduce((sum, c) => sum + c.completed, 0);
 const totalRequired = mockCategories.reduce((sum, c) => sum + c.required, 0);
 
 export default function GraduationStatusPage() {
+  const navigate = useNavigate();
   const donutR = 46;
   const circumference = 2 * Math.PI * donutR;
   const filledArc = circumference * (totalCompleted / totalRequired);
+
+  function handleLogout(): void {
+    navigate('/');
+  }
 
   return (
     <div
@@ -37,14 +44,26 @@ export default function GraduationStatusPage() {
     >
       <NavBar />
 
-      <main className="px-6 md:px-16 py-10 max-w-5xl mx-auto">
+      <main className="px-6 md:px-16 py-5 max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">畢業學分狀態</h1>
-          <p className="text-gray-500 mt-1">
-            {mockStudent.department} · {mockStudent.grade} · {mockStudent.studentId}
-          </p>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">畢業學分狀態</h1>
+            <p className="text-gray-500 mt-1">
+              {mockStudent.department} · {mockStudent.grade} · {mockStudent.studentId}
+            </p>
+          </div>
+          <button
+            className="w-fit rounded-full px-5 py-2.5 text-sm font-medium text-gray-500 transition-all hover:text-gray-800"
+            style={glassButton}
+            type="button"
+            onClick={handleLogout}
+          >
+            登出
+          </button>
         </div>
+
+        <SystemTabs />
 
         {/* Course search bar */}
         <CourseSearchBar onAdd={(course) => console.log('Add course:', course)} />
@@ -104,17 +123,13 @@ export default function GraduationStatusPage() {
               </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex flex-row gap-3 shrink-0">
-              {['修課紀錄', '問題回報'].map((label) => (
-                <button
-                  key={label}
-                  className="px-5 py-2.5 rounded-full text-sm font-medium text-gray-400 transition-all"
-                  style={glassButton}
-                >
-                  {label}
-                </button>
-              ))}
+            <div className="flex shrink-0 justify-center md:justify-start">
+              <button
+                className="rounded-full px-5 py-2.5 text-sm font-medium text-gray-400 transition-all"
+                style={glassButton}
+              >
+                問題回報
+              </button>
             </div>
           </div>
         </div>
