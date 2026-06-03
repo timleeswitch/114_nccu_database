@@ -198,7 +198,13 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   }
 
   return (
-    <div className="space-y-6">
+    <div
+      className="min-h-screen space-y-6 px-4 py-6 md:px-8"
+      style={{
+        background:
+          'radial-gradient(ellipse 55% 60% at 15% 50%, #aacde8CC 0%, transparent 100%), radial-gradient(circle at 65% 40%, #FFCA4BAA 0%, #FFCA4B66 12%, #FFCA4B22 28%, transparent 55%), #ffffff',
+      }}
+    >
       <Card className="px-6 py-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
