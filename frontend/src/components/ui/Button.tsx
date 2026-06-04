@@ -6,10 +6,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
-  primary: 'text-white shadow-sm hover:opacity-90',
-  secondary: 'text-gray-700 hover:bg-white/80',
-  ghost: 'text-gray-500 hover:text-gray-800 hover:bg-white/60',
-  danger: 'text-white bg-red-500 hover:bg-red-600',
+  primary: 'text-white shadow-sm hover:-translate-y-0.5 hover:shadow-lg hover:opacity-90',
+  secondary: 'text-gray-700 hover:-translate-y-0.5 hover:bg-white/80 hover:shadow-md',
+  ghost: 'text-gray-500 hover:-translate-y-0.5 hover:bg-white/60 hover:text-gray-800',
+  danger: 'text-white bg-red-500 hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-lg',
 };
 
 const variantStyles: Record<NonNullable<ButtonProps['variant']>, CSSProperties> = {
@@ -34,7 +34,7 @@ export default function Button({
     <button
       type={type}
       className={[
-        'inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-60',
+        'inline-flex cursor-pointer items-center justify-center rounded-xl px-5 py-3 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-60',
         variantClasses[variant],
         className,
       ].join(' ')}
