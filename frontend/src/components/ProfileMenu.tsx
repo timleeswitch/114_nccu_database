@@ -31,7 +31,7 @@ export default function ProfileMenu() {
         aria-label="開啟個人選單"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((current) => !current)}
-        className="flex h-[72px] w-[72px] items-center justify-center rounded-full border border-gray-300/80 bg-white/70 shadow-md transition-all hover:-translate-y-0.5 hover:border-gray-400/80 hover:bg-white"
+        className="flex h-[72px] w-[72px] cursor-pointer items-center justify-center rounded-full border border-gray-300/80 bg-white/70 shadow-md transition-all hover:-translate-y-0.5 hover:border-gray-400/80 hover:bg-white"
       >
         <img
           alt="個人頭像"
@@ -45,7 +45,7 @@ export default function ProfileMenu() {
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full rounded-xl px-4 py-2.5 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+            className="w-full cursor-pointer rounded-xl px-4 py-2.5 text-left text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
           >
             登出
           </button>

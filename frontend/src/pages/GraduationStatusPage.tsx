@@ -175,7 +175,7 @@ export default function GraduationStatusPage() {
                       ? () => navigate('/records')
                       : () => window.open(REPORT_FORM_URL, '_blank', 'noopener,noreferrer')
                   }
-                  className="px-5 py-2.5 rounded-full text-sm font-medium text-gray-400 transition-all hover:-translate-y-0.5 hover:border-gray-400 hover:bg-white/80 hover:text-gray-600 hover:shadow-lg"
+                  className="cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium text-gray-400 transition-all hover:-translate-y-0.5 hover:border-gray-400 hover:bg-white/80 hover:text-gray-600 hover:shadow-lg"
                   style={{ ...glassButton, border: '1px solid rgba(209, 213, 219, 0.85)' }}
                 >
                   {label}
