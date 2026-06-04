@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import CategoryCard from '../components/CategoryCard';
 import CourseSearchBar from '../components/CourseSearchBar';
+import ProfileMenu from '../components/ProfileMenu';
 import { getGraduationCheck } from '../services/graduationService';
 import { glassCard, glassButton } from '../styles/glass';
 import type { CreditCategory } from '../components/CategoryCard';
@@ -68,11 +69,14 @@ export default function GraduationStatusPage() {
 
       <main className="px-6 md:px-16 py-10 max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">畢業學分狀態</h1>
-          <p className="text-gray-500 mt-1">
-            {mockStudent.department} · {mockStudent.studentId}
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-6 md:pr-8">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">畢業學分狀態</h1>
+            <p className="text-gray-500 mt-1">
+              {mockStudent.department} · {mockStudent.studentId}
+            </p>
+          </div>
+          <ProfileMenu />
         </div>
 
         {error && (
