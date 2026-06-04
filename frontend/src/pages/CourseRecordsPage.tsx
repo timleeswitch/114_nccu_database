@@ -221,8 +221,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
       <Card className="px-6 py-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-500">個人修課紀錄</p>
-            <h2 className="mt-1 text-3xl font-bold text-gray-900">修課紀錄</h2>
+            <h2 className="text-3xl font-bold text-gray-900">修課紀錄</h2>
             <p className="mt-2 max-w-4xl text-sm leading-6 text-gray-500">
               你可以從學校課程庫選擇課程，加入自己的修課紀錄。課程代碼、名稱、學分與類別由系統帶入，不能自行修改。
             </p>
@@ -291,7 +290,9 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
                 <th className="px-5 py-4 font-medium">課程名稱</th>
                 <th className="px-5 py-4 font-medium">課程類別</th>
                 <th className="px-5 py-4 font-medium">學分</th>
-                <th className="px-5 py-4 font-medium">操作</th>
+                <th className="px-5 py-4 font-medium">
+                  <span className="mx-auto block w-[136px] text-left pl-3">操作</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -303,7 +304,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
                   <td className="px-5 py-4">{getCourseCategoryLabel(record.category)}</td>
                   <td className="px-5 py-4">{record.credits}</td>
                   <td className="px-5 py-4">
-                    <div className="flex gap-2">
+                    <div className="flex justify-center gap-2">
                       <Button className="px-4 py-2" variant="secondary" onClick={() => openEditForm(record)}>
                         編輯
                       </Button>
