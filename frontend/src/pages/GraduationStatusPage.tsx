@@ -9,6 +9,9 @@ import { getCurrentStudent } from '../services/studentService';
 import { glassCard, glassButton } from '../styles/glass';
 import type { CreditCategory } from '../components/CategoryCard';
 
+const REPORT_FORM_URL =
+  'https://docs.google.com/forms/d/e/1FAIpQLSdQaDaffhk0diL6ixlea017P_CJRpPB_tV79YGdspdStMV7Hw/viewform?usp=publish-editor';
+
 const initialStudentProfile = {
   studentId: localStorage.getItem('student_id') ?? '',
   name: '',
@@ -167,9 +170,13 @@ export default function GraduationStatusPage() {
               {['修課紀錄', '問題回報'].map((label) => (
                 <button
                   key={label}
-                  onClick={label === '修課紀錄' ? () => navigate('/records') : undefined}
-                  className="px-5 py-2.5 rounded-full text-sm font-medium text-gray-400 transition-all"
-                  style={glassButton}
+                  onClick={
+                    label === '修課紀錄'
+                      ? () => navigate('/records')
+                      : () => window.open(REPORT_FORM_URL, '_blank', 'noopener,noreferrer')
+                  }
+                  className="px-5 py-2.5 rounded-full text-sm font-medium text-gray-400 transition-all hover:-translate-y-0.5 hover:border-gray-400 hover:bg-white/80 hover:text-gray-600 hover:shadow-lg"
+                  style={{ ...glassButton, border: '1px solid rgba(209, 213, 219, 0.85)' }}
                 >
                   {label}
                 </button>

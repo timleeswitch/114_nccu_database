@@ -1,10 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import profileIcon from '../assets/profile_icon.png';
 
 export default function ProfileMenu() {
   const navigate = useNavigate();
+  const menuRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    function handleDocumentClick(event: MouseEvent): void {
+      if (!menuRef.current?.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleDocumentClick);
+    return () => document.removeEventListener('mousedown', handleDocumentClick);
+  }, []);
 
   function handleLogout(): void {
     localStorage.removeItem('access_token');
@@ -13,17 +25,17 @@ export default function ProfileMenu() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <button
         type="button"
         aria-label="開啟個人選單"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((current) => !current)}
-        className="flex h-[72px] w-[72px] items-center justify-center rounded-full border border-white/80 bg-white/70 shadow-md transition-all hover:-translate-y-0.5 hover:bg-white"
+        className="flex h-[72px] w-[72px] items-center justify-center rounded-full border border-gray-300/80 bg-white/70 shadow-md transition-all hover:-translate-y-0.5 hover:border-gray-400/80 hover:bg-white"
       >
         <img
           alt="個人頭像"
-          className="h-14 w-14 rounded-full object-cover"
+          className="h-14 w-14 rounded-full border border-gray-200 object-cover"
           src={profileIcon}
         />
       </button>

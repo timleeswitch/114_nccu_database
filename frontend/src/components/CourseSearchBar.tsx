@@ -30,10 +30,12 @@ export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
     return () => { if (blurTimer.current) clearTimeout(blurTimer.current); };
   }, []);
 
-  const filtered = query.trim()
+  const normalizedQuery = query.trim().toLowerCase();
+  const filtered = normalizedQuery
     ? mockCourses.filter(
         (c) =>
-          c.name.includes(query) || c.code.toLowerCase().includes(query.toLowerCase())
+          c.name.toLowerCase().includes(normalizedQuery) ||
+          c.code.toLowerCase().includes(normalizedQuery)
       )
     : [];
 
@@ -57,8 +59,13 @@ export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
           value={query}
           onChange={(e) => { setQuery(e.target.value); setShowDropdown(true); }}
           onFocus={() => setShowDropdown(true)}
-          onBlur={() => { blurTimer.current = setTimeout(() => setShowDropdown(false), 150); }}
-          placeholder="搜尋課程代碼或名稱新增課程..."
+          onBlur={() => {
+            blurTimer.current = setTimeout(() => {
+              setShowDropdown(false);
+              setQuery('');
+            }, 150);
+          }}
+          placeholder="搜尋課程代碼或名稱..."
           className="flex-1 bg-transparent outline-none text-base placeholder-gray-300 rainbow-text"
           aria-label="搜尋並新增課程"
           aria-expanded={showDropdown && filtered.length > 0}
