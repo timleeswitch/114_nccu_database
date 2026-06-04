@@ -116,7 +116,7 @@ export default function AuthSection() {
             <button
               key={t}
               onClick={() => switchTab(t)}
-              className="px-8 py-2.5 rounded-lg text-base font-medium transition-all"
+              className="cursor-pointer px-8 py-2.5 rounded-lg text-base font-medium transition-all hover:-translate-y-0.5 hover:shadow-md"
               style={tab === t ? { backgroundColor: '#036eb8', color: '#fff' } : { color: '#4b5563' }}
             >
               {t === 'login' ? '登入' : '註冊'}
@@ -158,7 +158,7 @@ export default function AuthSection() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-3 w-full py-4 rounded-xl text-white text-base font-medium hover:opacity-90 transition-opacity"
+              className="mt-3 w-full cursor-pointer py-4 rounded-xl text-white text-base font-medium transition-all hover:-translate-y-0.5 hover:shadow-lg hover:opacity-90 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 disabled:shadow-none"
               style={{ backgroundColor: '#036eb8' }}
             >
               {isSubmitting ? '登入中...' : '登入'}
@@ -209,7 +209,7 @@ export default function AuthSection() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-3 w-full py-4 rounded-xl text-white text-base font-medium hover:opacity-90 transition-opacity"
+              className="mt-3 w-full cursor-pointer py-4 rounded-xl text-white text-base font-medium transition-all hover:-translate-y-0.5 hover:shadow-lg hover:opacity-90 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 disabled:shadow-none"
               style={{ backgroundColor: '#036eb8' }}
             >
               {isSubmitting ? '註冊中...' : '註冊'}
