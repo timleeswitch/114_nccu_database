@@ -111,6 +111,18 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     };
   }, [studentId]);
 
+  useEffect(() => {
+    if (!message) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setMessage('');
+    }, 3000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [message]);
+
   const filteredRecords = useMemo(() => {
     return records.filter((record) => {
       const matchesSemester =
