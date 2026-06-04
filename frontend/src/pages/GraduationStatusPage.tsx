@@ -5,11 +5,13 @@ import CategoryCard from '../components/CategoryCard';
 import CourseSearchBar from '../components/CourseSearchBar';
 import ProfileMenu from '../components/ProfileMenu';
 import { getGraduationCheck } from '../services/graduationService';
+import { getCurrentStudent } from '../services/studentService';
 import { glassCard, glassButton } from '../styles/glass';
 import type { CreditCategory } from '../components/CategoryCard';
 
-const mockStudent = {
+const initialStudentProfile = {
   studentId: localStorage.getItem('student_id') ?? '',
+  name: '',
   department: '資訊科學系',
 };
 
@@ -22,10 +24,24 @@ export default function GraduationStatusPage() {
   const [categories, setCategories] = useState<CreditCategory[]>([]);
   const [totalCompleted, setTotalCompleted] = useState(0);
   const [totalRequired, setTotalRequired] = useState(128);
+  const [studentProfile, setStudentProfile] = useState(initialStudentProfile);
   const [error, setError] = useState('');
 
   useEffect(() => {
     let isMounted = true;
+
+    getCurrentStudent()
+      .then((student) => {
+        if (!isMounted) return;
+        setStudentProfile({
+          studentId: String(student.student_id),
+          name: student.name,
+          department: '資訊科學系',
+        });
+      })
+      .catch(() => {
+        // Keep the localStorage fallback if the profile request is unavailable.
+      });
 
     getGraduationCheck()
       .then((result) => {
@@ -73,10 +89,15 @@ export default function GraduationStatusPage() {
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900">畢業學分狀態</h1>
             <p className="text-gray-500 mt-1">
-              {mockStudent.department} · {mockStudent.studentId}
+              {studentProfile.department} · 學號: {studentProfile.studentId}
             </p>
           </div>
-          <ProfileMenu />
+          <div className="flex items-center gap-4">
+            <p className="hidden sm:block text-base md:text-lg font-semibold text-gray-600">
+              歡迎回來，{studentProfile.name || '同學'}!
+            </p>
+            <ProfileMenu />
+          </div>
         </div>
 
         {error && (

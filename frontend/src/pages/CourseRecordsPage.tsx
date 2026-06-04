@@ -223,7 +223,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
           <div>
             <p className="text-sm font-medium text-gray-500">個人修課紀錄</p>
             <h2 className="mt-1 text-3xl font-bold text-gray-900">修課紀錄</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
+            <p className="mt-2 max-w-4xl text-sm leading-6 text-gray-500">
               你可以從學校課程庫選擇課程，加入自己的修課紀錄。課程代碼、名稱、學分與類別由系統帶入，不能自行修改。
             </p>
             <p className="mt-2 text-sm text-gray-500">
