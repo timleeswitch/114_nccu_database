@@ -1,31 +1,60 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import CategoryCard from '../components/CategoryCard';
 import CourseSearchBar from '../components/CourseSearchBar';
+import { getGraduationCheck } from '../services/graduationService';
 import { glassCard, glassButton } from '../styles/glass';
 import type { CreditCategory } from '../components/CategoryCard';
 
 const mockStudent = {
-  name: '張小明',
-  studentId: '110205069',
+  studentId: localStorage.getItem('student_id') ?? '',
   department: '資訊科學系',
-  grade: '大四',
 };
 
-const mockCategories: CreditCategory[] = [
-  { name: '系必修', completed: 48, required: 52 },
-  { name: '系選修', completed: 24, required: 24 },
-  { name: '通識', completed: 16, required: 20 },
-  { name: '體育', completed: 8, required: 8 },
-  { name: '系外選修', completed: 0, required: 24 },
-];
-
-const totalCompleted = mockCategories.reduce((sum, c) => sum + c.completed, 0);
-const totalRequired = mockCategories.reduce((sum, c) => sum + c.required, 0);
+function formatCategoryName(category: string, subCategory: string | null): string {
+  return subCategory ? `${category} - ${subCategory}` : category;
+}
 
 export default function GraduationStatusPage() {
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState<CreditCategory[]>([]);
+  const [totalCompleted, setTotalCompleted] = useState(0);
+  const [totalRequired, setTotalRequired] = useState(128);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getGraduationCheck()
+      .then((result) => {
+        if (!isMounted) return;
+        setCategories(
+          result.summary.map((item) => ({
+            name: formatCategoryName(item.category, item.sub_category),
+            completed: item.completed,
+            required: item.required,
+          })),
+        );
+        setTotalCompleted(result.total_completed);
+        setTotalRequired(result.total_required);
+      })
+      .catch((caughtError) => {
+        if (isMounted) {
+          setError(caughtError instanceof Error ? caughtError.message : '無法取得畢業學分檢核結果。');
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const remainingCredits = Math.max(0, totalRequired - totalCompleted);
+  const completionRate = totalRequired > 0 ? Math.min(1, totalCompleted / totalRequired) : 0;
   const donutR = 46;
   const circumference = 2 * Math.PI * donutR;
-  const filledArc = circumference * (totalCompleted / totalRequired);
+  const filledArc = circumference * completionRate;
 
   return (
     <div
@@ -42,9 +71,13 @@ export default function GraduationStatusPage() {
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">畢業學分狀態</h1>
           <p className="text-gray-500 mt-1">
-            {mockStudent.department} · {mockStudent.grade} · {mockStudent.studentId}
+            {mockStudent.department} · {mockStudent.studentId}
           </p>
         </div>
+
+        {error && (
+          <p className="mb-6 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>
+        )}
 
         {/* Course search bar */}
         <CourseSearchBar onAdd={(course) => console.log('Add course:', course)} />
@@ -71,7 +104,7 @@ export default function GraduationStatusPage() {
                 transform="rotate(-90 60 60)"
               />
               <text x="61" y="65" textAnchor="middle" fill="#6b8cba" fontSize="18" fontWeight="bold">
-                {Math.round((totalCompleted / totalRequired) * 100)}%
+                {Math.round(completionRate * 100)}%
               </text>
             </svg>
 
@@ -89,7 +122,7 @@ export default function GraduationStatusPage() {
               <div>
                 <p className="text-gray-400 text-base mb-1">尚缺學分</p>
                 <p className="leading-none">
-                  <span className="text-5xl font-bold text-amber-400">{totalRequired - totalCompleted}</span>
+                  <span className="text-5xl font-bold text-amber-400">{remainingCredits}</span>
                   <span className="text-xl text-gray-400 ml-1">學分</span>
                 </p>
               </div>
@@ -97,9 +130,9 @@ export default function GraduationStatusPage() {
                 <p className="text-gray-400 text-base mb-1">完成類別</p>
                 <p className="leading-none">
                   <span className="text-5xl font-bold" style={{ color: '#50C878' }}>
-                    {mockCategories.filter((c) => c.completed >= c.required).length}
+                    {categories.filter((c) => c.completed >= c.required).length}
                   </span>
-                  <span className="text-xl text-gray-400 ml-1">/ {mockCategories.length}</span>
+                  <span className="text-xl text-gray-400 ml-1">/ {categories.length}</span>
                 </p>
               </div>
             </div>
@@ -109,6 +142,7 @@ export default function GraduationStatusPage() {
               {['修課紀錄', '問題回報'].map((label) => (
                 <button
                   key={label}
+                  onClick={label === '修課紀錄' ? () => navigate('/records') : undefined}
                   className="px-5 py-2.5 rounded-full text-sm font-medium text-gray-400 transition-all"
                   style={glassButton}
                 >
@@ -122,7 +156,7 @@ export default function GraduationStatusPage() {
         {/* Category breakdown */}
         <h2 className="text-xl font-semibold text-gray-800 mb-4">學分類別明細</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {mockCategories.map((category) => (
+          {categories.map((category) => (
             <CategoryCard key={category.name} category={category} />
           ))}
         </div>

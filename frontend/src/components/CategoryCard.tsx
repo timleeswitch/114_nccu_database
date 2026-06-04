@@ -13,7 +13,7 @@ interface CategoryCardProps {
 
 export default function CategoryCard({ category }: CategoryCardProps) {
   const { name, completed, required } = category;
-  const remaining = required - completed;
+  const remaining = Math.max(0, required - completed);
   const done = completed >= required;
 
   return (

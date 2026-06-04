@@ -43,3 +43,19 @@ class Enrollment(Base):
 
     student = relationship("Student", back_populates="enrollments")
     course = relationship("Course", back_populates="enrollments")
+
+    @property
+    def course_name(self) -> str:
+        return self.course.name
+
+    @property
+    def credits(self):
+        return self.course.credits
+
+    @property
+    def category(self) -> str:
+        return self.course.category.value
+
+    @property
+    def sub_category(self) -> str | None:
+        return self.course.sub_category

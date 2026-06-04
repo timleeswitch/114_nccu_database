@@ -1,6 +1,7 @@
-from pydantic import BaseModel
-from typing import Optional
 from decimal import Decimal
+from typing import Optional
+
+from pydantic import BaseModel
 
 class CourseResponse(BaseModel):
     course_id: str
@@ -11,3 +12,7 @@ class CourseResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+
+

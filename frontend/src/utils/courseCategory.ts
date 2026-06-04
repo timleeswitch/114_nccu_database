@@ -13,6 +13,6 @@ export function getCourseCategoryLabel(category: CourseCategory | string): strin
     case 'other':
       return '其他';
     default:
-      return '其他';
+      return category;
   }
 }
