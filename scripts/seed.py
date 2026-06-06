@@ -22,6 +22,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.database import SessionLocal  # noqa: E402
+from app.core.security import get_password_hash  # noqa: E402
 from app.models import (  # noqa: E402
     Course,
     CourseCategory,
@@ -187,6 +188,7 @@ def seed_courses(batch_size: int = 500) -> int:
 
 DEMO_STUDENT_PASS_ID = 1
 DEMO_STUDENT_FAIL_ID = 2
+DEMO_STUDENT_PASSWORD_HASH = get_password_hash("demo")
 
 
 def _pick(
@@ -253,12 +255,12 @@ def seed_demo_students() -> dict:
         s_pass = Student(
             student_id=DEMO_STUDENT_PASS_ID,
             name="王達標",
-            hashed_password="$demo$",
+            hashed_password=DEMO_STUDENT_PASSWORD_HASH,
         )
         s_fail = Student(
             student_id=DEMO_STUDENT_FAIL_ID,
             name="李未達",
-            hashed_password="$demo$",
+            hashed_password=DEMO_STUDENT_PASSWORD_HASH,
         )
         session.add_all([s_pass, s_fail])
         session.flush()

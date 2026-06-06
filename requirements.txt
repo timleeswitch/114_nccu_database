@@ -8,4 +8,4 @@ python-jose[cryptography]
 passlib[bcrypt]
 pytest
 httpx
-dotenv
+python-dotenv

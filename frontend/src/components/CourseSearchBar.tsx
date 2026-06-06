@@ -1,21 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
+import { getSchoolCourses } from '../services/courseService';
 import { glassInput } from '../styles/glass';
-
-const mockCourses = [
-  { code: 'CS101', name: '程式設計', credits: 3 },
-  { code: 'CS201', name: '資料結構', credits: 3 },
-  { code: 'CS301', name: '演算法', credits: 3 },
-  { code: 'CS401', name: '作業系統', credits: 3 },
-  { code: 'GE101', name: '英文寫作', credits: 2 },
-  { code: 'GE201', name: '微積分', credits: 4 },
-  { code: 'PE101', name: '體育', credits: 1 },
-];
-
-interface Course {
-  code: string;
-  name: string;
-  credits: number;
-}
+import type { Course } from '../types/course';
 
 interface CourseSearchBarProps {
   onAdd: (course: Course) => void;
@@ -23,19 +9,37 @@ interface CourseSearchBarProps {
 
 export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
   const [query, setQuery] = useState('');
+  const [courses, setCourses] = useState<Course[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    return () => { if (blurTimer.current) clearTimeout(blurTimer.current); };
+    let isMounted = true;
+
+    getSchoolCourses()
+      .then((schoolCourses) => {
+        if (isMounted) {
+          setCourses(schoolCourses);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setCourses([]);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+      if (blurTimer.current) clearTimeout(blurTimer.current);
+    };
   }, []);
 
   const normalizedQuery = query.trim().toLowerCase();
   const filtered = normalizedQuery
-    ? mockCourses.filter(
+    ? courses.filter(
         (c) =>
           c.name.toLowerCase().includes(normalizedQuery) ||
-          c.code.toLowerCase().includes(normalizedQuery)
+          c.course_id.toLowerCase().includes(normalizedQuery)
       )
     : [];
 
@@ -91,14 +95,14 @@ export default function CourseSearchBar({ onAdd }: CourseSearchBarProps) {
         >
           {filtered.map((course) => (
             <button
-              key={course.code}
+              key={course.course_id}
               onMouseDown={() => handleSelect(course)}
               role="option"
               aria-selected={false}
               className="w-full flex items-center justify-between px-5 py-3 text-sm hover:bg-blue-50 transition-colors text-left"
             >
               <span className="text-gray-700 font-medium">{course.name}</span>
-              <span className="text-gray-400">{course.code} · {course.credits} 學分</span>
+              <span className="text-gray-400">{course.course_id} · {course.credits} 學分</span>
             </button>
           ))}
         </div>
