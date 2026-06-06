@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = 'http://127.0.0.1:8000';
+const REGISTER_SUCCESS_MESSAGE = '註冊成功，資料已儲存至資料庫。';
 
 const inputStyle: React.CSSProperties = {
   background: 'rgba(255, 255, 255, 0.74)',
@@ -20,6 +21,18 @@ export default function AuthSection() {
   const [registerPassword, setRegisterPassword] = useState('');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (message !== REGISTER_SUCCESS_MESSAGE) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setMessage('');
+    }, 3000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [message]);
 
   function switchTab(nextTab: 'login' | 'register'): void {
     setTab(nextTab);
@@ -81,7 +94,7 @@ export default function AuthSection() {
       setRegisterStudentId('');
       setRegisterName('');
       setRegisterPassword('');
-      setMessage('註冊成功，資料已儲存至資料庫。');
+      setMessage(REGISTER_SUCCESS_MESSAGE);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '註冊失敗');
     } finally {
