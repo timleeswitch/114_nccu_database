@@ -26,7 +26,7 @@ interface EnrollmentFormState {
   courseId: string;
 }
 
-const semesters = ['111-1', '111-2', '112-1', '112-2', '113-1', '113-2', '114-1', '114-2'];
+const semesters = ['114-2', '114-1', '113-2', '113-1', '112-2', '112-1', '111-2', '111-1'];
 const courseCategories = ['必修', '群修', '一般通識', '核心通識', '選修', '體育', '檢定'];
 const currentSemester = '114-2';
 const allSemesters = '全部';
@@ -38,6 +38,11 @@ function formatCourseOption(course: Course): string {
 
 function getCourseById(courses: Course[], courseId: string): Course | undefined {
   return courses.find((course) => course.course_id === courseId);
+}
+
+function getSemesterSortValue(semester: string): number {
+  const [year, term] = semester.split('-').map(Number);
+  return (Number.isFinite(year) ? year : 0) * 10 + (Number.isFinite(term) ? term : 0);
 }
 
 function CoursePreview({ course }: { course?: Course }) {
@@ -124,15 +129,41 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   }, [message]);
 
   const filteredRecords = useMemo(() => {
-    return records.filter((record) => {
-      const matchesSemester =
-        semesterFilter === allSemesters || record.semester === semesterFilter;
-      const matchesCategory =
-        categoryFilter === allCategories || record.category === categoryFilter;
+    return records
+      .filter((record) => {
+        const matchesSemester =
+          semesterFilter === allSemesters || record.semester === semesterFilter;
+        const matchesCategory =
+          categoryFilter === allCategories || record.category === categoryFilter;
 
-      return matchesSemester && matchesCategory;
-    });
+        return matchesSemester && matchesCategory;
+      })
+      .sort((a, b) => {
+        const semesterDiff = getSemesterSortValue(b.semester) - getSemesterSortValue(a.semester);
+        if (semesterDiff !== 0) {
+          return semesterDiff;
+        }
+
+        return String(a.course_code).localeCompare(String(b.course_code));
+      });
   }, [records, semesterFilter, categoryFilter]);
+
+  const groupedRecords = useMemo(() => {
+    return filteredRecords.reduce<Array<{ semester: string; records: EnrollmentRow[] }>>(
+      (groups, record) => {
+        const currentGroup = groups[groups.length - 1];
+
+        if (currentGroup?.semester === record.semester) {
+          currentGroup.records.push(record);
+        } else {
+          groups.push({ semester: record.semester, records: [record] });
+        }
+
+        return groups;
+      },
+      [],
+    );
+  }, [filteredRecords]);
 
   const selectedCourse = getCourseById(schoolCourses, formState.courseId);
   const formCourses = useMemo(
@@ -308,29 +339,35 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
               </tr>
             </thead>
             <tbody>
-              {filteredRecords.map((record) => (
-                <tr key={record.enrollment_id} className="border-b border-white/50 text-sm text-gray-700">
-                  <td className="px-5 py-4">{record.semester}</td>
-                  <td className="px-5 py-4 font-medium text-gray-900">{record.course_code}</td>
-                  <td className="px-5 py-4">{record.course_name}</td>
-                  <td className="px-5 py-4">{getCourseCategoryLabel(record.category)}</td>
-                  <td className="px-5 py-4">{record.credits}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex justify-center gap-2">
-                      <Button className="px-4 py-2" variant="secondary" onClick={() => openEditForm(record)}>
-                        編輯
-                      </Button>
-                      <Button
-                        className="px-4 py-2"
-                        variant="danger"
-                        onClick={() => handleDeleteEnrollment(record.enrollment_id)}
-                      >
-                        刪除
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {groupedRecords.map((group) =>
+                group.records.map((record, index) => (
+                  <tr key={record.enrollment_id} className="border-b border-white/50 text-sm text-gray-700">
+                    {index === 0 && (
+                      <td className="px-5 py-4 align-middle font-medium text-gray-900" rowSpan={group.records.length}>
+                        {group.semester}
+                      </td>
+                    )}
+                    <td className="px-5 py-4 font-medium text-gray-900">{record.course_code}</td>
+                    <td className="px-5 py-4">{record.course_name}</td>
+                    <td className="px-5 py-4">{getCourseCategoryLabel(record.category)}</td>
+                    <td className="px-5 py-4">{record.credits}</td>
+                    <td className="px-5 py-4">
+                      <div className="flex justify-center gap-2">
+                        <Button className="px-4 py-2" variant="secondary" onClick={() => openEditForm(record)}>
+                          編輯
+                        </Button>
+                        <Button
+                          className="px-4 py-2"
+                          variant="danger"
+                          onClick={() => handleDeleteEnrollment(record.enrollment_id)}
+                        >
+                          刪除
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                )),
+              )}
               {filteredRecords.length === 0 && (
                 <tr>
                   <td className="px-5 py-10 text-center text-gray-500" colSpan={6}>
