@@ -4,6 +4,7 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Modal from '../components/ui/Modal';
 import Select from '../components/ui/Select';
+import CourseSearchBar from '../components/CourseSearchBar';
 import { getSchoolCourses } from '../services/courseService';
 import {
   createEnrollment,
@@ -11,7 +12,7 @@ import {
   getStudentEnrollments,
   updateEnrollment,
 } from '../services/enrollmentService';
-import type { Course, CourseCategory } from '../types/course';
+import type { Course } from '../types/course';
 import type { EnrollmentRow } from '../types/enrollment';
 import { getCourseCategoryLabel } from '../utils/courseCategory';
 
@@ -21,10 +22,12 @@ interface CourseRecordsPageProps {
 
 interface EnrollmentFormState {
   semester: string;
+  category: string;
   courseId: string;
 }
 
 const semesters = ['111-1', '111-2', '112-1', '112-2', '113-1', '113-2', '114-1', '114-2'];
+const courseCategories = ['必修', '群修', '一般通識', '核心通識', '選修', '體育', '檢定'];
 const currentSemester = '114-2';
 const allSemesters = '全部';
 const allCategories = '全部';
@@ -34,7 +37,7 @@ function formatCourseOption(course: Course): string {
 }
 
 function getCourseById(courses: Course[], courseId: string): Course | undefined {
-  return courses.find((course) => course.course_id === Number(courseId));
+  return courses.find((course) => course.course_id === courseId);
 }
 
 function CoursePreview({ course }: { course?: Course }) {
@@ -74,6 +77,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   const [editingRecord, setEditingRecord] = useState<EnrollmentRow | null>(null);
   const [formState, setFormState] = useState<EnrollmentFormState>({
     semester: currentSemester,
+    category: allCategories,
     courseId: '',
   });
   const [message, setMessage] = useState('');
@@ -106,6 +110,18 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     };
   }, [studentId]);
 
+  useEffect(() => {
+    if (!message) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setMessage('');
+    }, 3000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [message]);
+
   const filteredRecords = useMemo(() => {
     return records.filter((record) => {
       const matchesSemester =
@@ -117,20 +133,19 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     });
   }, [records, semesterFilter, categoryFilter]);
 
-  const selectedCourse = getCourseById(schoolCourses, formState.courseId);
-  const totalCredits = filteredRecords.reduce((sum, record) => sum + record.credits, 0);
+  const formCourses = useMemo(() => {
+    return schoolCourses.filter((course) => {
+      return formState.category === allCategories || course.category === formState.category;
+    });
+  }, [formState.category, schoolCourses]);
 
-  function openCreateForm(): void {
-    setEditingRecord(null);
-    setFormState({ semester: currentSemester, courseId: '' });
-    setFormError('');
-    setIsFormOpen(true);
-  }
+  const selectedCourse = getCourseById(schoolCourses, formState.courseId);
 
   function openEditForm(record: EnrollmentRow): void {
     setEditingRecord(record);
     setFormState({
       semester: record.semester,
+      category: record.category,
       courseId: String(record.course_id),
     });
     setFormError('');
@@ -140,7 +155,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   function closeForm(): void {
     setIsFormOpen(false);
     setEditingRecord(null);
-    setFormState({ semester: currentSemester, courseId: '' });
+    setFormState({ semester: currentSemester, category: allCategories, courseId: '' });
     setFormError('');
   }
 
@@ -148,7 +163,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     event.preventDefault();
     setFormError('');
 
-    const courseId = Number(formState.courseId);
+    const courseId = formState.courseId;
 
     if (!formState.semester || !courseId) {
       setFormError('請選擇學期與課程。');
@@ -193,65 +208,41 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     }
   }
 
-  function handleSaveRecords(): void {
-    setMessage('已儲存目前 mock 修課紀錄。');
-  }
 
   return (
-    <div className="space-y-6">
-      <Card className="px-6 py-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-gray-500">個人修課紀錄</p>
-            <h2 className="mt-1 text-3xl font-bold text-gray-900">修課紀錄</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
-              你可以從學校課程庫選擇課程，加入自己的修課紀錄。課程代碼、名稱、學分與類別由系統帶入，不能自行修改。
-            </p>
-            <p className="mt-2 text-sm text-gray-500">
-              目前顯示 {filteredRecords.length} 筆紀錄，合計 {totalCredits} 學分
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button onClick={openCreateForm}>新增修課紀錄</Button>
-            <Button variant="secondary" onClick={handleSaveRecords}>
-              儲存紀錄
-            </Button>
-          </div>
-        </div>
+    <div
+      className="min-h-screen space-y-6 px-4 py-6 md:px-8"
+      style={{
+        background:
+          'radial-gradient(ellipse 55% 60% at 15% 50%, #aacde8CC 0%, transparent 100%), radial-gradient(circle at 65% 40%, #FFCA4BAA 0%, #FFCA4B66 12%, #FFCA4B22 28%, transparent 55%), #ffffff',
+      }}
+    >
+      <CourseSearchBar
+        onAdd={(course) => {
+          const match = schoolCourses.find((c) => c.course_code === course.code);
+          if (match) {
+            setFormState({
+              semester: currentSemester,
+              category: match.category,
+              courseId: String(match.course_id),
+            });
+            setEditingRecord(null);
+            setIsFormOpen(true);
+          }
+        }}
+        courses={schoolCourses.map((c) => ({ code: c.course_code, name: c.name, credits: c.credits }))}
+        semesterFilter={semesterFilter}
+        onSemesterChange={setSemesterFilter}
+        categoryFilter={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+        semesters={semesters}
+        allSemesters={allSemesters}
+        allCategories={allCategories}
+      />
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:max-w-2xl">
-          <Select
-            label="學期篩選"
-            value={semesterFilter}
-            onChange={(event) => setSemesterFilter(event.target.value)}
-          >
-            <option value={allSemesters}>全部</option>
-            {semesters.map((semester) => (
-              <option key={semester} value={semester}>
-                {semester}
-              </option>
-            ))}
-          </Select>
-          <Select
-            label="類別篩選"
-            value={categoryFilter}
-            onChange={(event) => setCategoryFilter(event.target.value)}
-          >
-            <option value={allCategories}>全部</option>
-            {(['required', 'core_elective', 'general', 'free_elective', 'other'] as CourseCategory[]).map(
-              (category) => (
-                <option key={category} value={category}>
-                  {getCourseCategoryLabel(category)}
-                </option>
-              ),
-            )}
-          </Select>
-        </div>
-
-        {message && (
-          <p className="mt-5 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">{message}</p>
-        )}
-      </Card>
+      {message && (
+        <p className="mb-2 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">{message}</p>
+      )}
 
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
@@ -263,7 +254,9 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
                 <th className="px-5 py-4 font-medium">課程名稱</th>
                 <th className="px-5 py-4 font-medium">課程類別</th>
                 <th className="px-5 py-4 font-medium">學分</th>
-                <th className="px-5 py-4 font-medium">操作</th>
+                <th className="px-5 py-4 font-medium">
+                  <span className="mx-auto block w-[136px] text-left pl-3">操作</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -275,7 +268,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
                   <td className="px-5 py-4">{getCourseCategoryLabel(record.category)}</td>
                   <td className="px-5 py-4">{record.credits}</td>
                   <td className="px-5 py-4">
-                    <div className="flex gap-2">
+                    <div className="flex justify-center gap-2">
                       <Button className="px-4 py-2" variant="secondary" onClick={() => openEditForm(record)}>
                         編輯
                       </Button>
@@ -318,7 +311,7 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
         onClose={closeForm}
       >
         <form className="grid gap-5" id="enrollment-form" onSubmit={handleSubmitEnrollment}>
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-3">
             <Select
               label="學期"
               value={formState.semester}
@@ -331,12 +324,30 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
               ))}
             </Select>
             <Select
+              label="類別"
+              value={formState.category}
+              onChange={(event) =>
+                setFormState((current) => ({
+                  ...current,
+                  category: event.target.value,
+                  courseId: '',
+                }))
+              }
+            >
+              <option value={allCategories}>全部</option>
+              {courseCategories.map((category) => (
+                <option key={category} value={category}>
+                  {getCourseCategoryLabel(category)}
+                </option>
+              ))}
+            </Select>
+            <Select
               label="課程"
               value={formState.courseId}
               onChange={(event) => setFormState((current) => ({ ...current, courseId: event.target.value }))}
             >
               <option value="">請選擇課程</option>
-              {schoolCourses.map((course) => (
+              {formCourses.map((course) => (
                 <option key={course.course_id} value={course.course_id}>
                   {formatCourseOption(course)}
                 </option>

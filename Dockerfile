@@ -23,6 +23,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY app ./app
 COPY alembic ./alembic
 COPY scripts ./scripts
+COPY data ./data
 COPY --from=frontend-builder /frontend/dist ./frontend/dist
 
 EXPOSE 8000
