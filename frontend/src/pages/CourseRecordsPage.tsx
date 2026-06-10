@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Modal from '../components/ui/Modal';
 import Select from '../components/ui/Select';
+import CourseSearchBar from '../components/CourseSearchBar';
 import { getSchoolCourses } from '../services/courseService';
 import {
   createEnrollment,
@@ -135,21 +136,6 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   }, [records, semesterFilter, categoryFilter]);
 
   const selectedCourse = getCourseById(schoolCourses, formState.courseId);
-  const formCourses = useMemo(
-    () =>
-      schoolCourses.filter(
-        (course) => formState.category === allCategories || course.category === formState.category,
-      ),
-    [schoolCourses, formState.category],
-  );
-  const totalCredits = filteredRecords.reduce((sum, record) => sum + Number(record.credits), 0);
-
-  function openCreateForm(): void {
-    setEditingRecord(null);
-    setFormState({ semester: currentSemester, category: allCategories, courseId: '' });
-    setFormError('');
-    setIsFormOpen(true);
-  }
 
   function openEditForm(record: EnrollmentRow): void {
     setEditingRecord(record);
@@ -218,9 +204,6 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     }
   }
 
-  function handleSaveRecords(): void {
-    setMessage('已儲存目前 mock 修課紀錄。');
-  }
 
   return (
     <div
@@ -230,67 +213,28 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
           'radial-gradient(ellipse 55% 60% at 15% 50%, #aacde8CC 0%, transparent 100%), radial-gradient(circle at 65% 40%, #FFCA4BAA 0%, #FFCA4B66 12%, #FFCA4B22 28%, transparent 55%), #ffffff',
       }}
     >
-      <Card className="px-6 py-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">修課紀錄</h2>
-            <p className="mt-2 max-w-4xl text-sm leading-6 text-gray-500">
-              你可以從學校課程庫選擇課程，加入自己的修課紀錄。課程代碼、名稱、學分與類別由系統帶入，不能自行修改。
-            </p>
-            <p className="mt-2 text-sm text-gray-500">
-              目前顯示 {filteredRecords.length} 筆紀錄，合計 {totalCredits} 學分
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button
-              className="shadow-sm hover:bg-gray-200"
-              variant="secondary"
-              style={{
-                background: '#f3f4f6',
-                border: '1px solid rgba(229,231,235,0.95)',
-              }}
-              onClick={() => navigate('/status')}
-            >
-              檢核頁
-            </Button>
-            <Button onClick={openCreateForm}>新增修課紀錄</Button>
-            <Button variant="secondary" onClick={handleSaveRecords}>
-              儲存紀錄
-            </Button>
-          </div>
-        </div>
+      <CourseSearchBar
+        onAdd={(course) => {
+          const match = schoolCourses.find((c) => c.course_code === course.code);
+          if (match) {
+            setFormState({ semester: currentSemester, courseId: String(match.course_id) });
+            setEditingRecord(null);
+            setIsFormOpen(true);
+          }
+        }}
+        courses={schoolCourses.map((c) => ({ code: c.course_code, name: c.name, credits: c.credits }))}
+        semesterFilter={semesterFilter}
+        onSemesterChange={setSemesterFilter}
+        categoryFilter={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+        semesters={semesters}
+        allSemesters={allSemesters}
+        allCategories={allCategories}
+      />
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:max-w-2xl">
-          <Select
-            label="學期篩選"
-            value={semesterFilter}
-            onChange={(event) => setSemesterFilter(event.target.value)}
-          >
-            <option value={allSemesters}>全部</option>
-            {semesters.map((semester) => (
-              <option key={semester} value={semester}>
-                {semester}
-              </option>
-            ))}
-          </Select>
-          <Select
-            label="類別篩選"
-            value={categoryFilter}
-            onChange={(event) => setCategoryFilter(event.target.value)}
-          >
-            <option value={allCategories}>全部</option>
-            {courseCategories.map((category) => (
-              <option key={category} value={category}>
-                {getCourseCategoryLabel(category)}
-              </option>
-            ))}
-          </Select>
-        </div>
-
-        {message && (
-          <p className="mt-5 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">{message}</p>
-        )}
-      </Card>
+      {message && (
+        <p className="mb-2 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">{message}</p>
+      )}
 
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">

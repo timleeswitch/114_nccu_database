@@ -1,4 +1,10 @@
-export type CourseCategory = string;
+export type CourseCategory =
+  | 'required'
+  | 'core_elective'
+  | 'free_elective'
+  | 'physical_education'
+  | 'general_education'
+  | 'core_general';
 
 export interface Course {
   course_id: string;

@@ -6,12 +6,14 @@ export function getCourseCategoryLabel(category: CourseCategory | string): strin
       return '必修';
     case 'core_elective':
       return '群修';
-    case 'general':
-      return '通識';
     case 'free_elective':
       return '選修';
-    case 'other':
-      return '其他';
+    case 'physical_education':
+      return '體育';
+    case 'general_education':
+      return '一般通識';
+    case 'core_general':
+      return '核心通識';
     default:
       return category;
   }
