@@ -5,7 +5,6 @@ import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Modal from '../components/ui/Modal';
 import Select from '../components/ui/Select';
-import CourseSearchBar from '../components/CourseSearchBar';
 import { getSchoolCourses } from '../services/courseService';
 import {
   createEnrollment,
@@ -27,7 +26,7 @@ interface EnrollmentFormState {
   courseId: string;
 }
 
-const semesters = ['111-1', '111-2', '112-1', '112-2', '113-1', '113-2', '114-1', '114-2'];
+const semesters = ['114-2', '114-1', '113-2', '113-1', '112-2', '112-1', '111-2', '111-1'];
 const courseCategories = ['必修', '群修', '一般通識', '核心通識', '選修', '體育', '檢定'];
 const currentSemester = '114-2';
 const allSemesters = '全部';
@@ -39,6 +38,11 @@ function formatCourseOption(course: Course): string {
 
 function getCourseById(courses: Course[], courseId: string): Course | undefined {
   return courses.find((course) => course.course_id === courseId);
+}
+
+function getSemesterSortValue(semester: string): number {
+  const [year, term] = semester.split('-').map(Number);
+  return (Number.isFinite(year) ? year : 0) * 10 + (Number.isFinite(term) ? term : 0);
 }
 
 function CoursePreview({ course }: { course?: Course }) {
@@ -125,17 +129,58 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
   }, [message]);
 
   const filteredRecords = useMemo(() => {
-    return records.filter((record) => {
-      const matchesSemester =
-        semesterFilter === allSemesters || record.semester === semesterFilter;
-      const matchesCategory =
-        categoryFilter === allCategories || record.category === categoryFilter;
+    return records
+      .filter((record) => {
+        const matchesSemester =
+          semesterFilter === allSemesters || record.semester === semesterFilter;
+        const matchesCategory =
+          categoryFilter === allCategories || record.category === categoryFilter;
 
-      return matchesSemester && matchesCategory;
-    });
+        return matchesSemester && matchesCategory;
+      })
+      .sort((a, b) => {
+        const semesterDiff = getSemesterSortValue(b.semester) - getSemesterSortValue(a.semester);
+        if (semesterDiff !== 0) {
+          return semesterDiff;
+        }
+
+        return String(a.course_code).localeCompare(String(b.course_code));
+      });
   }, [records, semesterFilter, categoryFilter]);
 
+  const groupedRecords = useMemo(() => {
+    return filteredRecords.reduce<Array<{ semester: string; records: EnrollmentRow[] }>>(
+      (groups, record) => {
+        const currentGroup = groups[groups.length - 1];
+
+        if (currentGroup?.semester === record.semester) {
+          currentGroup.records.push(record);
+        } else {
+          groups.push({ semester: record.semester, records: [record] });
+        }
+
+        return groups;
+      },
+      [],
+    );
+  }, [filteredRecords]);
+
   const selectedCourse = getCourseById(schoolCourses, formState.courseId);
+  const formCourses = useMemo(
+    () =>
+      schoolCourses.filter(
+        (course) => formState.category === allCategories || course.category === formState.category,
+      ),
+    [schoolCourses, formState.category],
+  );
+  const totalCredits = filteredRecords.reduce((sum, record) => sum + Number(record.credits), 0);
+
+  function openCreateForm(): void {
+    setEditingRecord(null);
+    setFormState({ semester: currentSemester, category: allCategories, courseId: '' });
+    setFormError('');
+    setIsFormOpen(true);
+  }
 
   function openEditForm(record: EnrollmentRow): void {
     setEditingRecord(record);
@@ -204,6 +249,9 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
     }
   }
 
+  function handleSaveRecords(): void {
+    setMessage('已儲存目前 mock 修課紀錄。');
+  }
 
   return (
     <div
@@ -213,28 +261,67 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
           'radial-gradient(ellipse 55% 60% at 15% 50%, #aacde8CC 0%, transparent 100%), radial-gradient(circle at 65% 40%, #FFCA4BAA 0%, #FFCA4B66 12%, #FFCA4B22 28%, transparent 55%), #ffffff',
       }}
     >
-      <CourseSearchBar
-        onAdd={(course) => {
-          const match = schoolCourses.find((c) => c.course_code === course.code);
-          if (match) {
-            setFormState({ semester: currentSemester, courseId: String(match.course_id) });
-            setEditingRecord(null);
-            setIsFormOpen(true);
-          }
-        }}
-        courses={schoolCourses.map((c) => ({ code: c.course_code, name: c.name, credits: c.credits }))}
-        semesterFilter={semesterFilter}
-        onSemesterChange={setSemesterFilter}
-        categoryFilter={categoryFilter}
-        onCategoryChange={setCategoryFilter}
-        semesters={semesters}
-        allSemesters={allSemesters}
-        allCategories={allCategories}
-      />
+      <Card className="px-6 py-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">修課紀錄</h2>
+            <p className="mt-2 max-w-4xl text-sm leading-6 text-gray-500">
+              你可以從學校課程庫選擇課程，加入自己的修課紀錄。課程代碼、名稱、學分與類別由系統帶入，不能自行修改。
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              目前顯示 {filteredRecords.length} 筆紀錄，合計 {totalCredits} 學分
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button
+              className="shadow-sm hover:bg-gray-200"
+              variant="secondary"
+              style={{
+                background: '#f3f4f6',
+                border: '1px solid rgba(229,231,235,0.95)',
+              }}
+              onClick={() => navigate('/status')}
+            >
+              檢核頁
+            </Button>
+            <Button onClick={openCreateForm}>新增修課紀錄</Button>
+            <Button variant="secondary" onClick={handleSaveRecords}>
+              儲存紀錄
+            </Button>
+          </div>
+        </div>
 
-      {message && (
-        <p className="mb-2 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">{message}</p>
-      )}
+        <div className="mt-6 grid gap-4 md:grid-cols-2 lg:max-w-2xl">
+          <Select
+            label="學期篩選"
+            value={semesterFilter}
+            onChange={(event) => setSemesterFilter(event.target.value)}
+          >
+            <option value={allSemesters}>全部</option>
+            {semesters.map((semester) => (
+              <option key={semester} value={semester}>
+                {semester}
+              </option>
+            ))}
+          </Select>
+          <Select
+            label="類別篩選"
+            value={categoryFilter}
+            onChange={(event) => setCategoryFilter(event.target.value)}
+          >
+            <option value={allCategories}>全部</option>
+            {courseCategories.map((category) => (
+              <option key={category} value={category}>
+                {getCourseCategoryLabel(category)}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        {message && (
+          <p className="mt-5 rounded-2xl bg-blue-50 px-4 py-3 text-sm text-blue-700">{message}</p>
+        )}
+      </Card>
 
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
@@ -252,29 +339,35 @@ export default function CourseRecordsPage({ studentId }: CourseRecordsPageProps)
               </tr>
             </thead>
             <tbody>
-              {filteredRecords.map((record) => (
-                <tr key={record.enrollment_id} className="border-b border-white/50 text-sm text-gray-700">
-                  <td className="px-5 py-4">{record.semester}</td>
-                  <td className="px-5 py-4 font-medium text-gray-900">{record.course_code}</td>
-                  <td className="px-5 py-4">{record.course_name}</td>
-                  <td className="px-5 py-4">{getCourseCategoryLabel(record.category)}</td>
-                  <td className="px-5 py-4">{record.credits}</td>
-                  <td className="px-5 py-4">
-                    <div className="flex justify-center gap-2">
-                      <Button className="px-4 py-2" variant="secondary" onClick={() => openEditForm(record)}>
-                        編輯
-                      </Button>
-                      <Button
-                        className="px-4 py-2"
-                        variant="danger"
-                        onClick={() => handleDeleteEnrollment(record.enrollment_id)}
-                      >
-                        刪除
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {groupedRecords.map((group) =>
+                group.records.map((record, index) => (
+                  <tr key={record.enrollment_id} className="border-b border-white/50 text-sm text-gray-700">
+                    {index === 0 && (
+                      <td className="px-5 py-4 align-middle font-medium text-gray-900" rowSpan={group.records.length}>
+                        {group.semester}
+                      </td>
+                    )}
+                    <td className="px-5 py-4 font-medium text-gray-900">{record.course_code}</td>
+                    <td className="px-5 py-4">{record.course_name}</td>
+                    <td className="px-5 py-4">{getCourseCategoryLabel(record.category)}</td>
+                    <td className="px-5 py-4">{record.credits}</td>
+                    <td className="px-5 py-4">
+                      <div className="flex justify-center gap-2">
+                        <Button className="px-4 py-2" variant="secondary" onClick={() => openEditForm(record)}>
+                          編輯
+                        </Button>
+                        <Button
+                          className="px-4 py-2"
+                          variant="danger"
+                          onClick={() => handleDeleteEnrollment(record.enrollment_id)}
+                        >
+                          刪除
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                )),
+              )}
               {filteredRecords.length === 0 && (
                 <tr>
                   <td className="px-5 py-10 text-center text-gray-500" colSpan={6}>

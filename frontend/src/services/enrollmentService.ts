@@ -37,7 +37,9 @@ function normalizeEnrollment(row: Omit<EnrollmentRow, 'course_code'>): Enrollmen
   };
 }
 
-export async function getStudentEnrollments(_studentId: number): Promise<EnrollmentRow[]> {
+export async function getStudentEnrollments(studentId: number): Promise<EnrollmentRow[]> {
+  void studentId;
+
   const response = await fetch(`${API_BASE_URL}/enrollments/`, {
     headers: getAuthHeaders(),
   });
