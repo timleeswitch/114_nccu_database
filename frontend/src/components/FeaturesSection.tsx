@@ -1,7 +1,4 @@
-
-interface FeaturesSectionProps {}
-
-export default function FeaturesSection({}: FeaturesSectionProps) {
+export default function FeaturesSection() {
   return (
     <section id="features" className="px-6 md:px-16 pt-12 pb-0 text-center">
       <h2 className="text-3xl md:text-4xl font-bold text-gray-900">還有多少學分可以畢業？</h2>

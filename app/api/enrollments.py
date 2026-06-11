@@ -5,7 +5,12 @@ from sqlalchemy.orm import Session
 from app.api.auth import get_current_student_id
 from app.crud import enrollment as enrollment_crud
 from app.database import get_db
-from app.schemas.enrollment import EnrollmentCreate, EnrollmentDetail, EnrollmentResponse
+from app.schemas.enrollment import (
+    EnrollmentCreate,
+    EnrollmentDetail,
+    EnrollmentResponse,
+    EnrollmentUpdate,
+)
 
 router = APIRouter()
 
@@ -43,6 +48,34 @@ def create_enrollment(
             status_code=status.HTTP_409_CONFLICT,
             detail="Already enrolled in this course for the semester",
         )
+
+@router.patch("/{enrollment_id}", response_model=EnrollmentResponse)
+def update_enrollment(
+    enrollment_id: int,
+    payload: EnrollmentUpdate,
+    db: Session = Depends(get_db),
+    student_id: int = Depends(get_current_student_id),
+):
+    try:
+        enrollment = enrollment_crud.update_enrollment(
+            db,
+            enrollment_id=enrollment_id,
+            student_id=student_id,
+            course_id=payload.course_id,
+            semester=payload.semester,
+        )
+    except IntegrityError as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Already enrolled in this course for the semester",
+        ) from e
+
+    if enrollment is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Enrollment not found",
+        )
+    return enrollment
 
 
 @router.delete("/{enrollment_id}", status_code=status.HTTP_204_NO_CONTENT)

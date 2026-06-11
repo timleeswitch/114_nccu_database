@@ -1,6 +1,4 @@
-interface ContactSectionProps {}
-
-export default function ContactSection({}: ContactSectionProps) {
+export default function ContactSection() {
   return (
     <footer className="px-6 py-10 text-center text-sm text-gray-400 space-y-1">
       <p className="font-medium text-gray-500">NCCUCS</p>

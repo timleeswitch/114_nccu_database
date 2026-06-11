@@ -1,43 +1,21 @@
-from datetime import datetime, timedelta, timezone
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
+from app.core.security import (
+    ALGORITHM,
+    SECRET_KEY,
+    create_access_token,
+    get_password_hash,
+    verify_password,
+)
 from app.crud import student as student_crud
 from app.database import get_db
 from app.schemas.student import RegisterRequest, LoginRequest, StudentResponse, TokenResponse
 
-import os
-from dotenv import load_dotenv
-load_dotenv()
-
-SECRET_KEY = os.getenv("SECRET_KEY")
-if not SECRET_KEY:
-    raise RuntimeError("SECRET_KEY is not set")
-
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8  # 8 hours
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 _oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 router = APIRouter()
-
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def create_access_token(student_id: int) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    payload = {
-        "sub": str(student_id),
-        "exp": expire
-    }
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def _credentials_exception() -> HTTPException:
@@ -74,7 +52,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
             detail="Student already exists"
         )
     
-    hashed_password = pwd_context.hash(request.password)
+    hashed_password = get_password_hash(request.password)
     student_crud.create_student(db, request.student_id, request.name, hashed_password)
     return TokenResponse(access_token=create_access_token(request.student_id), token_type="bearer")
     

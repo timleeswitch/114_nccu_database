@@ -1,18 +1,27 @@
-import os
 from fastapi import FastAPI
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from dotenv import load_dotenv
+
+# Load .env before importing modules that read environment variables.
+load_dotenv()
+
 from app.api import auth
 from app.api import students
 from app.api import graduation
 from app.api import courses
 from app.api import enrollments
-
-# 先載入 .env 環境變數（保留同學的改動）
-load_dotenv()
+from app.database import engine
 
 app = FastAPI(title="114 NCCU Database Project API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(
     auth.router,
@@ -43,13 +52,6 @@ app.include_router(
     prefix="/enrollments",
     tags=["enrollments"],
 )
-
-# 從環境變數讀取資料庫連線字串（保留你的 Docker 設定）
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://nccu_user:nccu_password@db:3306/nccu_db")
-
-# 建立 SQLAlchemy 資料庫引擎
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 @app.get("/")
 def read_root():
